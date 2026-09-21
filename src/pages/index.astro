@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import PostCard from '../components/PostCard.astro';
+import { SITE } from '../consts';
+import { getPublishedPosts } from '../lib/utils';
+
+const posts = await getPublishedPosts();
+const latest = posts.slice(0, SITE.homePostCount);
+---
+
+<BaseLayout>
+  <div class="mx-auto max-w-3xl px-5">
+    <!-- Hero -->
+    <section class="py-16 sm:py-24">
+      <p class="font-mono text-sm text-accent">$ whoami</p>
+      <h1
+        class="mt-4 text-4xl font-semibold tracking-tight sm:text-5xl sm:leading-[1.15]"
+      >
+        你好，我是 {SITE.name}。
+      </h1>
+      <p class="mt-6 max-w-xl text-lg leading-relaxed text-fg-muted">
+        {SITE.description}
+      </p>
+      <div class="mt-8 flex items-center gap-5 text-sm">
+        <a
+          href={SITE.social.github}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-fg-muted underline decoration-border decoration-1 underline-offset-4 transition-colors hover:text-accent"
+          >GitHub</a
+        >
+        <a
+          href={`mailto:${SITE.social.email}`}
+          class="text-fg-muted underline decoration-border decoration-1 underline-offset-4 transition-colors hover:text-accent"
+          >邮箱</a
+        >
+        <a
+          href="/rss.xml"
+          class="text-fg-muted underline decoration-border decoration-1 underline-offset-4 transition-colors hover:text-accent"
+          >RSS</a
+        >
+      </div>
+    </section>
+
+    <!-- 最近文章 -->
+    <section class="pb-20">
+      <div class="flex items-baseline justify-between border-b border-border pb-3">
+        <h2 class="font-mono text-xs uppercase tracking-widest text-fg-faint">
+          最近文章
+        </h2>
+        <a
+          href="/blog"
+          class="text-sm text-fg-muted transition-colors hover:text-accent"
+          >全部 →</a
+        >
+      </div>
+      <ul class="divide-y divide-border">
+        {latest.map((post) => <PostCard post={post} />)}
+      </ul>
+    </section>
+  </div>
+</BaseLayout>

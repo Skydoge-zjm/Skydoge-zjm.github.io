@@ -1,0 +1,26 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import PostLayout from '../../layouts/PostLayout.astro';
+import { getPublishedPosts } from '../../lib/utils';
+
+export const getStaticPaths = (async () => {
+  const posts = await getPublishedPosts();
+  return posts.map((post, index) => ({
+    params: { slug: post.id },
+    props: {
+      post,
+      // 倒序排列：index + 1 是更早的文章，index - 1 是更新的文章
+      prev: posts[index + 1],
+      next: posts[index - 1],
+    },
+  }));
+}) satisfies GetStaticPaths;
+
+const { post, prev, next } = Astro.props;
+const { Content, headings } = await render(post);
+---
+
+<PostLayout post={post} headings={headings} prev={prev} next={next}>
+  <Content />
+</PostLayout>

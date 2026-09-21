@@ -1,0 +1,118 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="搜索" description="搜索全站文章" noindex>
+  <div class="mx-auto max-w-3xl px-5 py-12">
+    <h1 class="text-2xl font-semibold tracking-tight">搜索</h1>
+
+    <div class="relative mt-6">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-faint"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input
+        id="search-input"
+        type="search"
+        placeholder="输入关键词，回车搜索…"
+        autocomplete="off"
+        class="w-full rounded-lg border border-border bg-bg-subtle py-3 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-fg-faint focus:border-accent"
+      />
+    </div>
+
+    <p id="search-status" class="mt-5 font-mono text-xs text-fg-faint"></p>
+    <ul id="search-results" class="mt-4 divide-y divide-border"></ul>
+  </div>
+</BaseLayout>
+
+{/*
+  原生 module 脚本：is:inline 让 Astro 原样输出、构建工具不做任何处理。
+  这里必须用原生 import()——Astro 的打包管线（Rolldown）会给客户端脚本里的
+  import() 包一层预加载辅助函数，而内联脚本走不到标记替换那一步，
+  会留下未替换的 __VITE_PRELOAD__ 导致运行时报错。
+*/}
+<script type="module" is:inline>
+  const input = document.getElementById('search-input');
+  const list = document.getElementById('search-results');
+  const status = document.getElementById('search-status');
+
+  if (input && list && status) {
+    let pagefind = null;
+    let loading = null;
+
+    // Pagefind 索引在构建时生成，只在生产站点存在；开发环境给出提示
+    const load = () => {
+      loading = loading ||
+        (async () => {
+          try {
+            pagefind = await import('/pagefind/pagefind.js');
+            await pagefind.options({ excerptLength: 20, bundlePath: '/pagefind/' });
+          } catch (e) {
+            status.textContent = '索引未生成：请先执行 npm run build（搜索仅在构建后的站点可用）';
+          }
+        })();
+      return loading;
+    };
+
+    const render = async (query) => {
+      const search = await pagefind.search(query);
+      const items = await Promise.all(
+        search.results.slice(0, 20).map((r) => r.data()),
+      );
+
+      list.replaceChildren();
+      if (items.length === 0) {
+        status.textContent = `没有找到与「${query}」相关的文章`;
+        return;
+      }
+      status.textContent = `找到 ${items.length} 条结果`;
+
+      for (const item of items) {
+        const li = document.createElement('li');
+        const link = document.createElement('a');
+        link.href = item.url;
+        link.className = 'group block py-5';
+
+        const title = document.createElement('h2');
+        title.className = 'font-medium transition-colors group-hover:text-accent';
+        title.textContent = (item.meta && item.meta.title) || item.url;
+
+        const excerpt = document.createElement('p');
+        excerpt.className = 'mt-1.5 line-clamp-2 text-sm text-fg-muted';
+        // Pagefind 的 excerpt 已对原文做过转义，只含自己的 <mark> 高亮标签
+        excerpt.innerHTML = item.excerpt || '';
+
+        link.append(title, excerpt);
+        li.append(link);
+        list.append(li);
+      }
+    };
+
+    let timer;
+    input.addEventListener('input', () => {
+      clearTimeout(timer);
+      const query = input.value.trim();
+      if (!query) {
+        list.replaceChildren();
+        status.textContent = '';
+        return;
+      }
+      timer = setTimeout(async () => {
+        await load();
+        if (pagefind) await render(query);
+      }, 180);
+    });
+
+    input.focus();
+  }
+</script>

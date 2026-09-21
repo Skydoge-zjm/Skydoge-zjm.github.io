@@ -1,0 +1,82 @@
+---
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import '../styles/global.css';
+import { SITE } from '../consts';
+
+interface Props {
+  /** 页面标题（不含站点名） */
+  title?: string;
+  description?: string;
+  /** OG 类型，文章页传 article */
+  ogType?: 'website' | 'article';
+  /** 不索引此页 */
+  noindex?: boolean;
+  /** 是否允许被站内搜索索引（只有文章页需要） */
+  searchable?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  ogType = 'website',
+  noindex = false,
+  searchable = false,
+} = Astro.props;
+
+const pageTitle = title ? `${title} · ${SITE.name}` : SITE.title;
+const canonical = new URL(Astro.url.pathname, Astro.site ?? SITE.url);
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{pageTitle}</title>
+    <meta name="description" content={description} />
+    <meta name="author" content={SITE.author} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex, follow" />}
+
+    <!-- Open Graph -->
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={pageTitle} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:locale" content="zh_CN" />
+    <meta name="twitter:card" content="summary" />
+    <meta name="twitter:title" content={pageTitle} />
+    <meta name="twitter:description" content={description} />
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      rel="alternate"
+      type="application/rss+xml"
+      title={SITE.title}
+      href="/rss.xml"
+    />
+
+    <!-- 主题初始化：在首屏渲染前确定亮/暗，避免闪白 -->
+    <script is:inline>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var dark = saved
+            ? saved === 'dark'
+            : window.matchMedia('(prefers-color-scheme: dark)').matches;
+          document.documentElement.classList.toggle('dark', dark);
+        } catch (e) {}
+      })();
+    </script>
+  </head>
+
+  <body class="flex min-h-screen flex-col">
+    <Header />
+    <main class="flex-1" data-pagefind-ignore={searchable ? undefined : ''}>
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>

@@ -1,0 +1,43 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import FormattedDate from './FormattedDate.astro';
+import Tag from './Tag.astro';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  /** 输出 data-tags 属性，供文章页客户端标签筛选使用 */
+  filterable?: boolean;
+}
+
+const { post, filterable = false } = Astro.props;
+---
+
+<li class="group" data-tags={filterable ? post.data.tags.join(',') : undefined}>
+  <a href={`/blog/${post.id}/`} class="block py-6">
+    <div class="flex items-center gap-3">
+      <FormattedDate date={post.data.pubDate} />
+      {
+        post.data.pinned && (
+          <span class="font-mono text-[0.68rem] text-accent">置顶</span>
+        )
+      }
+    </div>
+    <h3
+      class="mt-1.5 text-lg font-medium tracking-tight transition-colors group-hover:text-accent"
+    >
+      {post.data.title}
+    </h3>
+    <p class="mt-2 line-clamp-2 text-sm leading-relaxed text-fg-muted">
+      {post.data.description}
+    </p>
+    {
+      post.data.tags.length > 0 && (
+        <div class="mt-3 flex flex-wrap gap-1.5">
+          {post.data.tags.map((tag) => (
+            <Tag tag={tag} />
+          ))}
+        </div>
+      )
+    }
+  </a>
+</li>

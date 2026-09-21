@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import PostCard from '../../components/PostCard.astro';
+import { getPublishedPosts, getTagCounts } from '../../lib/utils';
+
+const posts = await getPublishedPosts();
+const tags = [...getTagCounts(posts).keys()];
+---
+
+<BaseLayout title="文章" description={`全部 ${posts.length} 篇文章`}>
+  <div class="mx-auto max-w-3xl px-5 py-12">
+    <h1 class="text-2xl font-semibold tracking-tight">文章</h1>
+    <p class="mt-2 text-sm text-fg-muted">共 {posts.length} 篇</p>
+
+    {
+      tags.length > 0 && (
+        <div class="mt-6 flex flex-wrap gap-1.5" role="group" aria-label="按标签筛选">
+          <button type="button" class="chip" data-tag="__all__" data-active="true">
+            全部
+          </button>
+          {tags.map((tag) => (
+            <button type="button" class="chip" data-tag={tag}>
+              #{tag}
+            </button>
+          ))}
+        </div>
+      )
+    }
+
+    <ul class="mt-8 divide-y divide-border" id="post-list">
+      {posts.map((post) => <PostCard post={post} filterable />)}
+    </ul>
+  </div>
+</BaseLayout>
+
+<script>
+  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-tag]');
+  const items = document.querySelectorAll<HTMLElement>('#post-list [data-tags]');
+
+  const apply = (tag: string) => {
+    buttons.forEach((button) => {
+      button.dataset.active = String(button.dataset.tag === tag);
+    });
+    items.forEach((item) => {
+      const itemTags = (item.dataset.tags ?? '').split(',').filter(Boolean);
+      item.hidden = tag !== '__all__' && !itemTags.includes(tag);
+    });
+  };
+
+  buttons.forEach((button) =>
+    button.addEventListener('click', () => apply(button.dataset.tag ?? '__all__')),
+  );
+
+  // 支持通过 ?tag=xxx 直达某个标签的筛选状态
+  const initial = new URLSearchParams(window.location.search).get('tag');
+  if (initial) apply(initial);
+</script>

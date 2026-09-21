@@ -1,0 +1,67 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { SITE } from '../consts';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+---
+
+<header
+  class="sticky top-0 z-40 border-b border-border bg-bg/85 backdrop-blur-md"
+  data-pagefind-ignore
+>
+  <div class="mx-auto flex h-14 max-w-3xl items-center justify-between px-5">
+    <a href="/" class="group flex items-baseline gap-2">
+      <span class="text-[0.95rem] font-semibold tracking-tight">{SITE.name}</span>
+      <span class="hidden font-mono text-xs text-fg-faint sm:inline">~/blog</span>
+    </a>
+
+    <nav class="flex items-center gap-0.5" aria-label="主导航">
+      {SITE.nav.map((item) => (
+        <a
+          href={item.href}
+          class="nav-link hidden sm:inline-flex"
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          {item.text}
+        </a>
+      ))}
+      <!-- 窄屏只保留核心入口 -->
+      <a
+        href="/blog"
+        class="nav-link sm:hidden"
+        aria-current={isActive('/blog') ? 'page' : undefined}
+      >
+        文章
+      </a>
+      <a
+        href="/about"
+        class="nav-link sm:hidden"
+        aria-current={isActive('/about') ? 'page' : undefined}
+      >
+        关于
+      </a>
+
+      <span class="mx-1 hidden h-4 w-px bg-border sm:block" aria-hidden="true"
+      ></span>
+
+      <a href="/search" class="icon-btn" aria-label="搜索">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          class="h-4 w-4"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+      </a>
+      <ThemeToggle />
+    </nav>
+  </div>
+</header>
