@@ -8,33 +8,33 @@ const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
 <BaseLayout title="归档" description={`按时间线浏览全部 ${posts.length} 篇文章`}>
-  <div class="mx-auto max-w-3xl px-5 py-12">
-    <h1 class="text-2xl font-semibold tracking-tight">归档</h1>
-    <p class="mt-2 text-sm text-fg-muted">共 {posts.length} 篇</p>
+  <div class="page-head">
+    <h1 class="page-title">归档</h1>
+    <p class="page-sub">共 <span class="num">{posts.length}</span> 篇</p>
+  </div>
 
-    <div class="mt-10 space-y-12">
-      {
-        byYear.map(([year, items]) => (
-          <section>
-            <h2 class="font-mono text-sm text-fg-faint">{year}</h2>
-            <ul class="mt-4 divide-y divide-border">
-              {items.map((post) => (
-                <li class="flex items-baseline gap-4 py-3.5">
-                  <span class="w-14 shrink-0 font-mono text-xs text-fg-faint">
-                    {pad(post.data.pubDate.getMonth() + 1)}-{pad(post.data.pubDate.getDate())}
-                  </span>
-                  <a
-                    href={`/blog/${post.id}/`}
-                    class="text-sm leading-snug transition-colors hover:text-accent"
-                  >
-                    {post.data.title}
-                  </a>
-                </li>
-              ))}
-            </ul>
-          </section>
-        ))
-      }
-    </div>
+  <div class="space-y-12">
+    {
+      byYear.map(([year, items]) => (
+        <section>
+          <p class="section-label">{year}</p>
+          <ul class="ledger">
+            {items.map((post) => (
+              <li class="ledger-row">
+                <span class="ledger-id" />
+                <span class="ledger-date">
+                  {pad(post.data.pubDate.getMonth() + 1)}-
+                  {pad(post.data.pubDate.getDate())}
+                </span>
+                <a href={`/blog/${post.id}/`} class="ledger-title">
+                  {post.data.title}
+                </a>
+                <span />
+              </li>
+            ))}
+          </ul>
+        </section>
+      ))
+    }
   </div>
 </BaseLayout>

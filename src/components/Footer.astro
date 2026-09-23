@@ -1,29 +1,14 @@
 ---
 import { SITE } from '../consts';
-
-const year = new Date().getFullYear();
 ---
 
-<footer class="mt-8 border-t border-border" data-pagefind-ignore>
+<footer class="mt-4 border-t border-border pt-6" data-pagefind-ignore>
   <div
-    class="mx-auto flex max-w-3xl flex-col items-center gap-3 px-5 py-8 text-xs text-fg-faint sm:flex-row sm:justify-between"
+    class="flex flex-col gap-2 text-xs text-fg-faint sm:flex-row sm:items-center sm:justify-between"
   >
-    <p class="font-mono">
-      © {year} {SITE.name} · 由 Astro 驱动
+    <p>
+      © {new Date().getFullYear()} {SITE.name} · 本站由 Astro 构建，托管于 GitHub Pages
     </p>
-    <div class="flex items-center gap-4">
-      <a
-        href={SITE.social.github}
-        class="transition-colors hover:text-fg"
-        target="_blank"
-        rel="noopener noreferrer"
-      >
-        GitHub
-      </a>
-      <a href={`mailto:${SITE.social.email}`} class="transition-colors hover:text-fg">
-        邮箱
-      </a>
-      <a href="/rss.xml" class="transition-colors hover:text-fg">RSS</a>
-    </div>
+    <p class="font-mono">纸 · 墨 · 印</p>
   </div>
 </footer>

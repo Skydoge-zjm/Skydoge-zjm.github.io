@@ -1,6 +1,5 @@
 ---
 import BaseLayout from './BaseLayout.astro';
-import FormattedDate from '../components/FormattedDate.astro';
 import Tag from '../components/Tag.astro';
 import Giscus from '../components/Giscus.astro';
 import { readingTime, type Post } from '../lib/utils';
@@ -17,114 +16,82 @@ const { post, headings, prev, next } = Astro.props;
 const { title, description, pubDate, updatedDate, tags } = post.data;
 const minutes = readingTime(post.body ?? '');
 const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const pad = (n: number) => String(n).padStart(2, '0');
 ---
 
-<BaseLayout
-  title={title}
-  description={description}
-  ogType="article"
-  searchable
->
-  <article class="mx-auto max-w-3xl px-5 pb-4 pt-12">
-    <header>
-      <div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-fg-faint">
-        <FormattedDate date={pubDate} />
-        <span aria-hidden="true">·</span>
-        <span class="font-mono text-xs">约 {minutes} 分钟</span>
-        {
-          updatedDate && (
-            <>
-              <span aria-hidden="true">·</span>
-              <span class="font-mono text-xs">
-                更新于 {updatedDate.getFullYear()}-
-                {String(updatedDate.getMonth() + 1).padStart(2, '0')}-
-                {String(updatedDate.getDate()).padStart(2, '0')}
-              </span>
-            </>
-          )
-        }
-      </div>
-      <h1 class="mt-3 text-3xl font-semibold tracking-tight sm:text-[2.1rem] sm:leading-tight">
-        {title}
-      </h1>
-      <p class="mt-4 leading-relaxed text-fg-muted">{description}</p>
+<BaseLayout title={title} description={description} ogType="article" searchable>
+  <article class="measure">
+    <p class="post-crumb">~/blog/<b>{post.id}</b></p>
+    <h1 class="post-title">{title}</h1>
+
+    <div class="post-meta">
+      <span>{pubDate.getFullYear()}-{pad(pubDate.getMonth() + 1)}-{pad(pubDate.getDate())}</span>
+      <span>约 {minutes} 分钟</span>
       {
-        tags.length > 0 && (
-          <div class="mt-5 flex flex-wrap gap-1.5">
-            {tags.map((tag) => (
-              <Tag tag={tag} />
-            ))}
-          </div>
+        updatedDate && (
+          <span>
+            更新于 {updatedDate.getFullYear()}-{pad(updatedDate.getMonth() + 1)}-
+            {pad(updatedDate.getDate())}
+          </span>
         )
       }
-    </header>
+    </div>
 
-    <div class="mt-10 border-t border-border pt-10">
-      <div class="prose">
-        <slot />
-      </div>
+    {
+      tags.length > 0 && (
+        <div class="mt-4 flex flex-wrap gap-1.5">
+          {tags.map((tag) => (
+            <Tag tag={tag} />
+          ))}
+        </div>
+      )
+    }
+
+    <div class="mt-12 prose">
+      <slot />
     </div>
   </article>
 
   {
     (prev || next) && (
-      <nav
-        class="mx-auto max-w-3xl px-5 py-10"
-        aria-label="上一篇 / 下一篇"
-      >
-        <div class="grid gap-5 border-t border-border pt-8 sm:grid-cols-2">
-          {prev ? (
-            <a href={`/blog/${prev.id}/`} class="group block">
-              <p class="font-mono text-xs text-fg-faint">← 上一篇</p>
-              <p class="mt-1.5 line-clamp-1 text-sm font-medium transition-colors group-hover:text-accent">
-                {prev.data.title}
-              </p>
-            </a>
-          ) : (
-            <span />
-          )}
-          {next ? (
-            <a
-              href={`/blog/${next.id}/`}
-              class="group block sm:text-right"
-            >
-              <p class="font-mono text-xs text-fg-faint">下一篇 →</p>
-              <p class="mt-1.5 line-clamp-1 text-sm font-medium transition-colors group-hover:text-accent">
-                {next.data.title}
-              </p>
-            </a>
-          ) : (
-            <span />
-          )}
-        </div>
+      <nav class="post-nav measure mt-14" aria-label="上一篇 / 下一篇">
+        {prev ? (
+          <a href={`/blog/${prev.id}/`} class="post-nav-item">
+            <p class="post-nav-dir">较早一篇</p>
+            <p class="post-nav-title">{prev.data.title}</p>
+          </a>
+        ) : (
+          <span />
+        )}
+        {next ? (
+          <a href={`/blog/${next.id}/`} class="post-nav-item sm:text-right">
+            <p class="post-nav-dir">较新一篇</p>
+            <p class="post-nav-title">{next.data.title}</p>
+          </a>
+        ) : (
+          <span />
+        )}
       </nav>
     )
   }
 
-  <div class="mx-auto max-w-3xl px-5 pb-16">
+  <div class="measure mt-14">
     <Giscus />
   </div>
 
-  <!-- 桌面端浮动目录 -->
+  {/* 宽屏右侧留白处的目录 */}
   {
     toc.length >= 3 && (
-      <aside
-        class="pointer-events-none fixed top-24 left-1/2 z-30 ml-[26rem] hidden w-52 xl:block"
-        aria-label="目录"
-      >
-        <p class="font-mono text-xs uppercase tracking-widest text-fg-faint">
-          目录
-        </p>
-        <ul class="pointer-events-auto mt-3 space-y-1 border-l border-border">
+      <aside class="toc" aria-label="目录">
+        <p class="toc-label">目录</p>
+        <ul class="toc-list">
           {toc.map((h) => (
             <li>
               <a
                 href={`#${h.slug}`}
+                class="toc-link"
                 data-toc-link
-                class:list={[
-                  '-ml-px block border-l py-1 text-xs leading-snug transition-colors',
-                  h.depth === 3 ? 'pl-6 text-fg-faint' : 'pl-3 text-fg-muted',
-                ]}
+                data-depth={h.depth}
               >
                 {h.text}
               </a>
@@ -157,22 +124,22 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
   });
 
   // 目录高亮当前小节
-  const links = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
+  const links = [
+    ...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'),
+  ];
   if (links.length > 0) {
     const map = new Map<string, HTMLAnchorElement>();
     for (const link of links) {
       const id = link.getAttribute('href')?.slice(1);
       if (id) map.set(id, link);
     }
-    const headings = [...map.keys()]
+    const targets = [...map.keys()]
       .map((id) => document.getElementById(id))
       .filter((el): el is HTMLElement => el !== null);
 
     const activate = (id: string) => {
       for (const [key, link] of map) {
-        const active = key === id;
-        link.style.color = active ? 'var(--accent)' : '';
-        link.style.borderColor = active ? 'var(--accent)' : '';
+        link.dataset.active = String(key === id);
       }
     };
 
@@ -185,6 +152,6 @@ const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
       },
       { rootMargin: '-80px 0px -70% 0px' },
     );
-    headings.forEach((h) => observer.observe(h));
+    targets.forEach((el) => observer.observe(el));
   }
 </script>

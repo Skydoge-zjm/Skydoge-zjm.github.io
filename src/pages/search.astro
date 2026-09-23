@@ -3,36 +3,35 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="搜索" description="搜索全站文章" noindex>
-  <div class="mx-auto max-w-3xl px-5 py-12">
-    <h1 class="text-2xl font-semibold tracking-tight">搜索</h1>
-
-    <div class="relative mt-6">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        stroke-width="2"
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        class="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-faint"
-        aria-hidden="true"
-      >
-        <circle cx="11" cy="11" r="8"></circle>
-        <path d="m21 21-4.3-4.3"></path>
-      </svg>
-      <input
-        id="search-input"
-        type="search"
-        placeholder="输入关键词，回车搜索…"
-        autocomplete="off"
-        class="w-full rounded-lg border border-border bg-bg-subtle py-3 pl-10 pr-4 text-sm outline-none transition-colors placeholder:text-fg-faint focus:border-accent"
-      />
-    </div>
-
-    <p id="search-status" class="mt-5 font-mono text-xs text-fg-faint"></p>
-    <ul id="search-results" class="mt-4 divide-y divide-border"></ul>
+  <div class="page-head">
+    <h1 class="page-title">搜索</h1>
   </div>
+
+  <div class="relative">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="2"
+      stroke-linecap="round"
+      class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-faint"
+      aria-hidden="true"
+    >
+      <circle cx="11" cy="11" r="8"></circle>
+      <path d="m21 21-4.3-4.3"></path>
+    </svg>
+    <input
+      id="search-input"
+      type="search"
+      placeholder="输入关键词…"
+      autocomplete="off"
+      class="field"
+    />
+  </div>
+
+  <p id="search-status" class="empty-note mt-5"></p>
+  <ul id="search-results" class="ledger mt-3"></ul>
 </BaseLayout>
 
 {/*
@@ -79,16 +78,19 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
       for (const item of items) {
         const li = document.createElement('li');
+        li.className = 'ledger-row';
+        li.style.gridTemplateColumns = '1fr';
+
         const link = document.createElement('a');
         link.href = item.url;
-        link.className = 'group block py-5';
+        link.className = 'ledger-title';
 
-        const title = document.createElement('h2');
-        title.className = 'font-medium transition-colors group-hover:text-accent';
+        const title = document.createElement('span');
+        title.className = 'block';
         title.textContent = (item.meta && item.meta.title) || item.url;
 
-        const excerpt = document.createElement('p');
-        excerpt.className = 'mt-1.5 line-clamp-2 text-sm text-fg-muted';
+        const excerpt = document.createElement('span');
+        excerpt.className = 'mt-1 block text-sm leading-relaxed text-fg-muted';
         // Pagefind 的 excerpt 已对原文做过转义，只含自己的 <mark> 高亮标签
         excerpt.innerHTML = item.excerpt || '';
 

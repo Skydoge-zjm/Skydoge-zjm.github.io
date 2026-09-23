@@ -8,29 +8,29 @@ const tags = [...getTagCounts(posts).keys()];
 ---
 
 <BaseLayout title="文章" description={`全部 ${posts.length} 篇文章`}>
-  <div class="mx-auto max-w-3xl px-5 py-12">
-    <h1 class="text-2xl font-semibold tracking-tight">文章</h1>
-    <p class="mt-2 text-sm text-fg-muted">共 {posts.length} 篇</p>
-
-    {
-      tags.length > 0 && (
-        <div class="mt-6 flex flex-wrap gap-1.5" role="group" aria-label="按标签筛选">
-          <button type="button" class="chip" data-tag="__all__" data-active="true">
-            全部
-          </button>
-          {tags.map((tag) => (
-            <button type="button" class="chip" data-tag={tag}>
-              #{tag}
-            </button>
-          ))}
-        </div>
-      )
-    }
-
-    <ul class="mt-8 divide-y divide-border" id="post-list">
-      {posts.map((post) => <PostCard post={post} filterable />)}
-    </ul>
+  <div class="page-head">
+    <h1 class="page-title">文章</h1>
+    <p class="page-sub">共 <span class="num">{posts.length}</span> 篇</p>
   </div>
+
+  {
+    tags.length > 0 && (
+      <div class="mb-8 flex flex-wrap gap-1.5" role="group" aria-label="按标签筛选">
+        <button type="button" class="chip" data-tag="__all__" data-active="true">
+          全部
+        </button>
+        {tags.map((tag) => (
+          <button type="button" class="chip" data-tag={tag}>
+            #{tag}
+          </button>
+        ))}
+      </div>
+    )
+  }
+
+  <ul class="ledger" id="post-list">
+    {posts.map((post) => <PostCard post={post} filterable />)}
+  </ul>
 </BaseLayout>
 
 <script>
@@ -48,7 +48,9 @@ const tags = [...getTagCounts(posts).keys()];
   };
 
   buttons.forEach((button) =>
-    button.addEventListener('click', () => apply(button.dataset.tag ?? '__all__')),
+    button.addEventListener('click', () =>
+      apply(button.dataset.tag ?? '__all__'),
+    ),
   );
 
   // 支持通过 ?tag=xxx 直达某个标签的筛选状态

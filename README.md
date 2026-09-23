@@ -23,7 +23,7 @@ src/
 ├── layouts/
 │   ├── BaseLayout.astro  # 全站骨架：head、导航、页脚、主题初始化
 │   └── PostLayout.astro  # 文章页：标题、元信息、目录、上下篇、评论区
-├── components/           # Header / Footer / PostCard / Tag / ThemeToggle / Giscus ...
+├── components/           # Sidebar / Footer / PostCard / Tag / ThemeToggle / Giscus ...
 └── pages/                # 路由即文件
     ├── index.astro       # 首页
     ├── blog/             # 文章列表 + 文章详情

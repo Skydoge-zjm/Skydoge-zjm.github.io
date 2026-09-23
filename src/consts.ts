@@ -8,7 +8,7 @@ export const SITE = {
   /** 完整标题（首页 <title>、RSS 标题） */
   title: "Skydoge's Blog",
   /** 站点描述（SEO / OG / RSS） */
-  description: "Skydoge 的个人博客 —— 技术笔记、踩坑记录与随想。",
+  description: 'Skydoge 的写字地方。技术笔记、踩坑记录，偶尔胡思乱想。',
   /** 作者 */
   author: 'Skydoge',
   /** 部署地址（GitHub Pages 用户站点） */

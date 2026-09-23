@@ -1,0 +1,100 @@
+---
+import ThemeToggle from './ThemeToggle.astro';
+import { SITE } from '../consts';
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isActive = (href: string) =>
+  href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+---
+
+<aside class="rail" data-open="false" data-pagefind-ignore>
+  <div class="rail-top">
+    <a href="/" class="rail-brand">
+      <span class="seal" aria-hidden="true">記</span>
+      <span>
+        <span class="rail-wordmark">{SITE.name}</span>
+        <span class="rail-sub">~/blog</span>
+      </span>
+    </a>
+
+    <div class="rail-actions">
+      <a href="/search" class="icon-btn" aria-label="搜索">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          class="h-4 w-4"
+          aria-hidden="true"
+        >
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+      </a>
+      <ThemeToggle />
+      <button
+        id="rail-menu-btn"
+        type="button"
+        class="icon-btn lg:hidden"
+        aria-label="打开菜单"
+        aria-expanded="false"
+        aria-controls="rail-nav"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          class="h-4 w-4"
+          aria-hidden="true"
+        >
+          <path d="M4 7h16M4 12h16M4 17h16"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <nav class="rail-nav" id="rail-nav" aria-label="主导航">
+    {
+      SITE.nav.map((item) => (
+        <a
+          href={item.href}
+          class="rail-link"
+          aria-current={isActive(item.href) ? 'page' : undefined}
+        >
+          {item.text}
+        </a>
+      ))
+    }
+  </nav>
+
+  <div class="rail-foot">
+    <div class="rail-foot-row">
+      <a
+        href={SITE.social.github}
+        class="rail-text-link"
+        target="_blank"
+        rel="noopener noreferrer">GitHub</a
+      >
+      <a href={`mailto:${SITE.social.email}`} class="rail-text-link">邮箱</a>
+      <a href="/rss.xml" class="rail-text-link">RSS</a>
+    </div>
+    <p class="rail-sub">写代码，也写字。</p>
+  </div>
+</aside>
+
+<script>
+  const rail = document.querySelector<HTMLElement>('.rail');
+  const button = document.getElementById('rail-menu-btn');
+
+  button?.addEventListener('click', () => {
+    const open = rail?.dataset.open === 'true';
+    if (rail) rail.dataset.open = String(!open);
+    button.setAttribute('aria-expanded', String(!open));
+    button.setAttribute('aria-label', open ? '打开菜单' : '关闭菜单');
+  });
+</script>

@@ -3,53 +3,51 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 ---
 
 <BaseLayout title="友链" description="一些常逛的网站和朋友们的博客">
-  <div class="mx-auto max-w-3xl px-5 py-12">
-    <h1 class="text-2xl font-semibold tracking-tight">友链</h1>
-    <p class="mt-2 text-sm text-fg-muted">
-      一些常逛的网站。想交换友链的话，在下面留言或发邮件都行。
+  <div class="page-head">
+    <h1 class="page-title">友链</h1>
+    <p class="page-sub">一些常逛的网站。想交换友链的话，在下面留言或发邮件都行。</p>
+  </div>
+
+  <!-- ↓↓↓ 按下面的格式增删友链 ↓↓↓ -->
+  <ul class="list-none p-0">
+    <li>
+      <a
+        href="https://astro.build/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="entry"
+      >
+        <span class="entry-title">
+          Astro
+          <span class="entry-host">astro.build</span>
+        </span>
+        <span class="entry-desc block">本站所用的静态站点生成器。</span>
+      </a>
+    </li>
+    <li>
+      <a
+        href="https://pages.github.com/"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="entry"
+      >
+        <span class="entry-title">
+          GitHub Pages
+          <span class="entry-host">pages.github.com</span>
+        </span>
+        <span class="entry-desc block">免费静态站点托管。</span>
+      </a>
+    </li>
+  </ul>
+  <!-- ↑↑↑ 按上面的格式增删友链 ↑↑↑ -->
+
+  <div class="panel mt-12">
+    <h2 class="text-sm font-medium">申请友链</h2>
+    <p class="mt-2 text-sm leading-relaxed text-fg-muted">
+      在本页评论区留言，或发邮件到
+      <a href="mailto:2984095138@qq.com" class="text-accent">2984095138@qq.com</a>。
+      格式：<code class="font-mono text-xs">名称 / 站点地址 / 一句话介绍</code>。
+      原则上不设门槛，内容能长期访问即可。
     </p>
-
-    <!-- ↓↓↓ 按下面的格式增删友链 ↓↓↓ -->
-    <ul class="mt-10 divide-y divide-border">
-      <li class="py-5">
-        <a
-          href="https://astro.build/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="group block"
-        >
-          <h2 class="font-medium transition-colors group-hover:text-accent">
-            Astro
-            <span class="ml-1 font-mono text-xs text-fg-faint">astro.build</span>
-          </h2>
-          <p class="mt-1.5 text-sm text-fg-muted">本站所用的静态站点生成器。</p>
-        </a>
-      </li>
-      <li class="py-5">
-        <a
-          href="https://pages.github.com/"
-          target="_blank"
-          rel="noopener noreferrer"
-          class="group block"
-        >
-          <h2 class="font-medium transition-colors group-hover:text-accent">
-            GitHub Pages
-            <span class="ml-1 font-mono text-xs text-fg-faint">pages.github.com</span>
-          </h2>
-          <p class="mt-1.5 text-sm text-fg-muted">免费静态站点托管。</p>
-        </a>
-      </li>
-    </ul>
-    <!-- ↑↑↑ 按上面的格式增删友链 ↑↑↑ -->
-
-    <div class="mt-12 rounded-lg border border-border bg-bg-subtle p-5">
-      <h2 class="text-sm font-medium">申请友链</h2>
-      <p class="mt-2 text-sm leading-relaxed text-fg-muted">
-        在本页评论区留言，或发邮件到
-        <a href="mailto:2984095138@qq.com" class="text-accent">2984095138@qq.com</a>。
-        格式：<code class="font-mono text-xs">名称 / 站点地址 / 一句话介绍</code>。
-        原则上不设门槛，内容能长期访问即可。
-      </p>
-    </div>
   </div>
 </BaseLayout>

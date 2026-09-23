@@ -4,40 +4,44 @@ import { SITE } from '../consts';
 ---
 
 <BaseLayout title="关于" description="关于 Skydoge 和这个博客">
-  <div class="mx-auto max-w-3xl px-5 py-12">
-    <h1 class="text-2xl font-semibold tracking-tight">关于</h1>
-
-    <!-- ↓↓↓ 以下内容按需修改成你自己的介绍 ↓↓↓ -->
-    <div class="prose mt-8">
-      <p>
-        你好，我是 <strong>{SITE.name}</strong>，一名开发者。
-        这里是我的个人博客，用来放技术笔记、踩坑记录和一些不成熟的想法。
-      </p>
-
-      <h2>我在做什么</h2>
-      <p>
-        平时主要写代码，偶尔折腾工具和效率流。相信「写下来」是理解一件事最便宜的方式，
-        所以有了这个站。
-      </p>
-
-      <h2>这个博客</h2>
-      <p>
-        用 <a href="https://astro.build/">Astro</a> 从零手写，
-        部署在 <a href="https://pages.github.com/">GitHub Pages</a>，
-        评论走 <a href="https://giscus.app/">Giscus</a>。
-        没有后台、没有数据库、没有追踪脚本——打开就是几KB的静态文件。
-      </p>
-      <p>
-        源码在 <a href={SITE.social.github}>GitHub</a>，
-        欢迎顺手点个 Star，也欢迎提 issue 交流。
-      </p>
-
-      <h2>联系我</h2>
-      <ul>
-        <li>GitHub：<a href={SITE.social.github}>{SITE.social.github.replace('https://', '')}</a></li>
-        <li>邮箱：<a href={`mailto:${SITE.social.email}`}>{SITE.social.email}</a></li>
-      </ul>
-    </div>
-    <!-- ↑↑↑ 以上内容按需修改成你自己的介绍 ↑↑↑ -->
+  <div class="page-head">
+    <h1 class="page-title">关于</h1>
   </div>
+
+  <!-- ↓↓↓ 以下内容按需修改成你自己的介绍 ↓↓↓ -->
+  <div class="prose">
+    <p>
+      你好，我是 <strong>{SITE.name}</strong>，一名开发者。
+      这里是我的个人博客，用来放技术笔记、踩坑记录和一些不成熟的想法。
+    </p>
+
+    <h2>我在做什么</h2>
+    <p>
+      平时主要写代码，偶尔折腾工具和效率流。相信「写下来」是理解一件事最便宜的方式，
+      所以有了这个站。
+    </p>
+
+    <h2>这个博客</h2>
+    <p>
+      用 <a href="https://astro.build/">Astro</a> 从零手写，
+      部署在 <a href="https://pages.github.com/">GitHub Pages</a>，
+      评论走 <a href="https://giscus.app/">Giscus</a>。
+      没有后台、没有数据库、没有追踪脚本——打开就是几 KB 的静态文件。
+    </p>
+    <p>
+      源码在 <a href={SITE.social.github}>GitHub</a>，
+      欢迎顺手点个 Star，也欢迎提 issue 交流。
+    </p>
+
+    <h2>联系我</h2>
+    <ul>
+      <li>
+        GitHub：<a href={SITE.social.github}
+          >{SITE.social.github.replace('https://', '')}</a
+        >
+      </li>
+      <li>邮箱：<a href={`mailto:${SITE.social.email}`}>{SITE.social.email}</a></li>
+    </ul>
+  </div>
+  <!-- ↑↑↑ 以上内容按需修改成你自己的介绍 ↑↑↑ -->
 </BaseLayout>
