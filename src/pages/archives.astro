@@ -21,7 +21,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
           <ul class="ledger">
             {items.map((post) => (
               <li class="ledger-row">
-                <span class="ledger-id" />
                 <span class="ledger-date">
                   {pad(post.data.pubDate.getMonth() + 1)}-
                   {pad(post.data.pubDate.getDate())}
@@ -29,7 +28,6 @@ const pad = (n: number) => String(n).padStart(2, '0');
                 <a href={`/blog/${post.id}/`} class="ledger-title">
                   {post.data.title}
                 </a>
-                <span />
               </li>
             ))}
           </ul>

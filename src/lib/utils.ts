@@ -9,19 +9,6 @@ export function formatDate(date: Date): string {
   return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`;
 }
 
-/**
- * 由 slug 派生一个稳定的 6 位短 ID（FNV-1a → base36），
- * 形如 git 短提交号。每次构建结果一致，可用来引用某一篇。
- */
-export function postId(slug: string): string {
-  let hash = 0x811c9dc5;
-  for (let i = 0; i < slug.length; i++) {
-    hash ^= slug.charCodeAt(i);
-    hash = Math.imul(hash, 0x01000193);
-  }
-  return (hash >>> 0).toString(36).slice(-6).padStart(6, '0');
-}
-
 /** 已发布文章，按发布日期倒序 */
 export async function getPublishedPosts(): Promise<Post[]> {
   const posts = await getCollection('blog', ({ data }) => !data.draft);

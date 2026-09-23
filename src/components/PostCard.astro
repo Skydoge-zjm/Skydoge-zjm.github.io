@@ -1,7 +1,6 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import Tag from './Tag.astro';
-import { postId } from '../lib/utils';
 
 interface Props {
   post: CollectionEntry<'blog'>;
@@ -15,7 +14,6 @@ const date = `${pad(post.data.pubDate.getMonth() + 1)}-${pad(post.data.pubDate.g
 ---
 
 <li class="ledger-row" data-tags={filterable ? post.data.tags.join(',') : undefined}>
-  <span class="ledger-id">{postId(post.id)}</span>
   <span class="ledger-date">{date}</span>
 
   <a href={`/blog/${post.id}/`} class="ledger-title">
