@@ -1,5 +1,9 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { getPublishedPosts, getTagCounts } from '../lib/utils';
+
+const posts = await getPublishedPosts();
+const tags = [...getTagCounts(posts).keys()];
 ---
 
 <BaseLayout title="搜索" description="搜索全站文章" noindex>
@@ -7,75 +11,119 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <h1 class="page-title">搜索</h1>
   </div>
 
-  <div class="relative">
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      stroke-width="2"
-      stroke-linecap="round"
-      class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-faint"
-      aria-hidden="true"
-    >
-      <circle cx="11" cy="11" r="8"></circle>
-      <path d="m21 21-4.3-4.3"></path>
-    </svg>
-    <input
-      id="search-input"
-      type="search"
-      placeholder="输入关键词…"
-      autocomplete="off"
-      class="field"
-    />
+  <div class="search-controls">
+    <div class="relative min-w-0">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        class="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-fg-faint"
+        aria-hidden="true"
+      >
+        <circle cx="11" cy="11" r="8"></circle>
+        <path d="m21 21-4.3-4.3"></path>
+      </svg>
+      <input
+        id="search-input"
+        type="search"
+        placeholder="输入关键词…"
+        autocomplete="off"
+        class="field"
+        aria-label="搜索文章"
+      />
+    </div>
+    <label class="search-filter-label" for="search-tag">
+      <span>标签</span>
+      <select id="search-tag" class="search-filter">
+        <option value="">全部标签</option>
+        {tags.map((tag) => <option value={tag}>#{tag}</option>)}
+      </select>
+    </label>
   </div>
-
-  <p id="search-status" class="empty-note mt-5"></p>
+  <p id="search-status" class="empty-note mt-5" role="status" aria-live="polite">输入关键词或选择标签开始搜索。</p>
   <ul id="search-results" class="ledger mt-3"></ul>
+  <ul id="search-catalog" hidden data-pagefind-ignore>
+    {posts.map((post) => (
+      <li data-tags={post.data.tags.map((tag) => `#${tag}`).join('|')}>
+        <a href={`/blog/${post.id}/`} data-title={post.data.title} data-description={post.data.description}>
+          {post.data.title}
+        </a>
+      </li>
+    ))}
+  </ul>
 </BaseLayout>
 
-{/*
-  原生 module 脚本：is:inline 让 Astro 原样输出、构建工具不做任何处理。
-  这里必须用原生 import()——Astro 的打包管线（Rolldown）会给客户端脚本里的
-  import() 包一层预加载辅助函数，而内联脚本走不到标记替换那一步，
-  会留下未替换的 __VITE_PRELOAD__ 导致运行时报错。
-*/}
 <script type="module" is:inline>
   const input = document.getElementById('search-input');
+  const tagSelect = document.getElementById('search-tag');
   const list = document.getElementById('search-results');
+  const catalog = document.getElementById('search-catalog');
   const status = document.getElementById('search-status');
 
-  if (input && list && status) {
+  if (input && tagSelect && list && status) {
     let pagefind = null;
     let loading = null;
+    let timer;
 
-    // Pagefind 索引在构建时生成，只在生产站点存在；开发环境给出提示
     const load = () => {
-      loading = loading ||
-        (async () => {
-          try {
-            pagefind = await import('/pagefind/pagefind.js');
-            await pagefind.options({ excerptLength: 20, bundlePath: '/pagefind/' });
-          } catch (e) {
-            status.textContent = '索引未生成：请先执行 npm run build（搜索仅在构建后的站点可用）';
-          }
-        })();
+      loading ||= (async () => {
+        try {
+          pagefind = await import('/pagefind/pagefind.js');
+          await pagefind.options({ excerptLength: 28, bundlePath: '/pagefind/' });
+        } catch {
+          status.textContent = '搜索索引尚未生成：请先执行 npm run build。';
+        }
+      })();
       return loading;
     };
 
-    const render = async (query) => {
-      const search = await pagefind.search(query);
-      const items = await Promise.all(
-        search.results.slice(0, 20).map((r) => r.data()),
-      );
-
-      list.replaceChildren();
-      if (items.length === 0) {
-        status.textContent = `没有找到与「${query}」相关的文章`;
+    const render = async () => {
+      const query = input.value.trim();
+      const selectedTag = tagSelect.value;
+      if (!query && !selectedTag) {
+        list.replaceChildren();
+        status.textContent = '输入关键词或选择标签开始搜索。';
         return;
       }
-      status.textContent = `找到 ${items.length} 条结果`;
 
+      if (!query && selectedTag && catalog) {
+        const matches = [...catalog.querySelectorAll('li')]
+          .filter((item) => item.dataset.tags?.split('|').includes(`#${selectedTag}`));
+        renderItems(matches.map((item) => {
+          const link = item.querySelector('a');
+          return {
+            url: link.href,
+            title: link.dataset.title,
+            excerpt: link.dataset.description,
+            excerptHtml: false,
+          };
+        }), selectedTag);
+        return;
+      }
+
+      await load();
+      if (!pagefind) return;
+
+      try {
+        const options = selectedTag ? { filters: { tags: [`#${selectedTag}`] } } : {};
+        const search = await pagefind.search(query, options);
+        const items = await Promise.all(search.results.slice(0, 20).map((result) => result.data()));
+        renderItems(items, selectedTag, search.results.length);
+      } catch {
+        status.textContent = '搜索暂时不可用，请刷新页面后重试。';
+      }
+    };
+
+    const renderItems = (items, selectedTag, total = items.length) => {
+      list.replaceChildren();
+      if (items.length === 0) {
+        status.textContent = '没有找到匹配的文章。';
+        return;
+      }
+      status.textContent = `找到 ${total} 篇${selectedTag ? `「${selectedTag}」标签下的` : ''}文章`;
       for (const item of items) {
         const li = document.createElement('li');
         li.className = 'ledger-row';
@@ -87,12 +135,16 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 
         const title = document.createElement('span');
         title.className = 'block';
-        title.textContent = (item.meta && item.meta.title) || item.url;
+        title.textContent = item.title || (item.meta && item.meta.title) || item.url;
 
         const excerpt = document.createElement('span');
         excerpt.className = 'mt-1 block text-sm leading-relaxed text-fg-muted';
-        // Pagefind 的 excerpt 已对原文做过转义，只含自己的 <mark> 高亮标签
-        excerpt.innerHTML = item.excerpt || '';
+        if (item.excerptHtml === false) {
+          excerpt.textContent = item.excerpt || '';
+        } else {
+          // Pagefind excerpt 已转义用户内容，只包含它自己的 <mark> 高亮标签。
+          excerpt.innerHTML = item.excerpt || '';
+        }
 
         link.append(title, excerpt);
         li.append(link);
@@ -100,21 +152,33 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       }
     };
 
-    let timer;
-    input.addEventListener('input', () => {
+    const schedule = () => {
       clearTimeout(timer);
-      const query = input.value.trim();
-      if (!query) {
-        list.replaceChildren();
-        status.textContent = '';
-        return;
-      }
-      timer = setTimeout(async () => {
-        await load();
-        if (pagefind) await render(query);
-      }, 180);
-    });
+      timer = setTimeout(() => void render(), 160);
+    };
+    input.addEventListener('input', schedule);
+    tagSelect.addEventListener('change', schedule);
 
-    input.focus();
+    window.addEventListener('keydown', (event) => {
+      const target = event.target;
+      const editing = target instanceof HTMLElement && (
+        target.isContentEditable || /^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)
+      );
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 'k') {
+        event.preventDefault();
+        input.focus();
+        input.select();
+      } else if (event.key === '/' && !editing && !event.altKey && !event.ctrlKey && !event.metaKey) {
+        event.preventDefault();
+        input.focus();
+      } else if (event.key === 'Escape' && document.activeElement === input) {
+        if (input.value) {
+          input.value = '';
+          schedule();
+        } else {
+          input.blur();
+        }
+      }
+    });
   }
 </script>

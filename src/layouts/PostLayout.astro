@@ -1,7 +1,7 @@
 ---
 import BaseLayout from './BaseLayout.astro';
 import Tag from '../components/Tag.astro';
-import Giscus from '../components/Giscus.astro';
+import { SITE } from '../consts';
 import { readingTime, type Post } from '../lib/utils';
 
 interface Props {
@@ -10,17 +10,51 @@ interface Props {
   headings: { depth: number; slug: string; text: string }[];
   prev?: Post;
   next?: Post;
+  related?: Post[];
+  seriesPosts?: Post[];
 }
 
-const { post, headings, prev, next } = Astro.props;
-const { title, description, pubDate, updatedDate, tags } = post.data;
+const {
+  post,
+  headings,
+  prev,
+  next,
+  related = [],
+  seriesPosts = [],
+} = Astro.props;
+const { title, description, pubDate, updatedDate, tags, series } = post.data;
 const minutes = readingTime(post.body ?? '');
-const toc = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const toc = headings.filter((h) => (h.depth === 2 || h.depth === 3) && h.slug !== 'footnote-label');
 const pad = (n: number) => String(n).padStart(2, '0');
+const canonical = new URL(Astro.url.pathname, SITE.url).toString();
+const jsonLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BlogPosting',
+  headline: title,
+  description,
+  url: canonical,
+  mainEntityOfPage: { '@type': 'WebPage', '@id': canonical },
+  datePublished: pubDate.toISOString(),
+  dateModified: (updatedDate ?? pubDate).toISOString(),
+  author: { '@type': 'Person', name: SITE.author },
+  publisher: { '@type': 'Person', name: SITE.author },
+  inLanguage: SITE.locale,
+  keywords: tags,
+};
 ---
 
-<BaseLayout title={title} description={description} ogType="article" searchable>
-  <article class="measure">
+<BaseLayout title={title} description={description} ogType="article" searchable jsonLd={jsonLd}>
+  <div class="reading-progress" id="reading-progress" role="progressbar" aria-label="阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-pagefind-ignore>
+    <span></span>
+  </div>
+  <button class="back-to-top" id="back-to-top" type="button" aria-label="返回顶部" data-pagefind-ignore>
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="m6 14 6-6 6 6"></path>
+      <path d="M12 8v12"></path>
+    </svg>
+  </button>
+
+  <article class="measure post-article">
     <p class="post-crumb">~/blog/<b>{post.id}</b></p>
     <h1 class="post-title">{title}</h1>
 
@@ -39,22 +73,83 @@ const pad = (n: number) => String(n).padStart(2, '0');
 
     {
       tags.length > 0 && (
-        <div class="mt-4 flex flex-wrap gap-1.5">
+        <div class="post-tags mt-4 flex flex-wrap gap-1.5">
           {tags.map((tag) => (
-            <Tag tag={tag} />
+            <>
+              <Tag tag={tag} filterable />
+            </>
           ))}
         </div>
       )
     }
 
-    <div class="mt-12 prose">
+    <div class="post-actions" data-pagefind-ignore>
+      <button type="button" class="text-action" id="share-post">分享</button>
+      <button type="button" class="text-action" id="copy-post-link">复制链接</button>
+      <span class="copy-status" id="post-action-status" role="status" aria-live="polite"></span>
+    </div>
+
+    {
+      toc.length >= 3 && (
+        <details class="toc-mobile" data-pagefind-ignore>
+          <summary>文章目录 <span>{toc.length} 节</span></summary>
+          <ul class="toc-list">
+            {toc.map((h) => (
+              <li>
+                <a href={`#${h.slug}`} class="toc-link" data-toc-link data-depth={h.depth}>
+                  {h.text}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </details>
+      )
+    }
+
+    <div class="mt-10 prose">
       <slot />
     </div>
   </article>
 
   {
+    series && seriesPosts.length > 1 && (
+      <nav class="series-nav measure mt-14" aria-label={`${series}系列文章`} data-pagefind-ignore>
+        <p class="section-label">系列 · {series}</p>
+        <ol class="series-list">
+          {seriesPosts.map((item, index) => (
+            <li>
+              <span class="series-index">{String(index + 1).padStart(2, '0')}</span>
+              {item.id === post.id ? (
+                <span class="series-current" aria-current="page">{item.data.title}</span>
+              ) : (
+                <a class="series-link" href={`/blog/${item.id}/`}>{item.data.title}</a>
+              )}
+            </li>
+          ))}
+        </ol>
+      </nav>
+    )
+  }
+
+  {
+    related.length > 0 && (
+      <section class="related-section measure mt-14" aria-labelledby="related-title" data-pagefind-ignore>
+        <h2 class="section-label" id="related-title">相关文章</h2>
+        <ul class="related-list">
+          {related.map((item) => (
+            <li>
+              <time datetime={item.data.pubDate.toISOString()}>{item.data.pubDate.getFullYear()}-{pad(item.data.pubDate.getMonth() + 1)}-{pad(item.data.pubDate.getDate())}</time>
+              <a href={`/blog/${item.id}/`}>{item.data.title}</a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
     (prev || next) && (
-      <nav class="post-nav measure mt-14" aria-label="上一篇 / 下一篇">
+      <nav class="post-nav measure mt-12" aria-label="上一篇 / 下一篇" data-pagefind-ignore>
         {prev ? (
           <a href={`/blog/${prev.id}/`} class="post-nav-item">
             <p class="post-nav-dir">较早一篇</p>
@@ -75,24 +170,15 @@ const pad = (n: number) => String(n).padStart(2, '0');
     )
   }
 
-  <div class="measure mt-14">
-    <Giscus />
-  </div>
-
-  {/* 宽屏右侧留白处的目录 */}
+  {/* 宽屏正文旁目录 */}
   {
     toc.length >= 3 && (
-      <aside class="toc" aria-label="目录">
+      <aside class="toc" aria-label="目录" data-pagefind-ignore>
         <p class="toc-label">目录</p>
         <ul class="toc-list">
           {toc.map((h) => (
             <li>
-              <a
-                href={`#${h.slug}`}
-                class="toc-link"
-                data-toc-link
-                data-depth={h.depth}
-              >
+              <a href={`#${h.slug}`} class="toc-link" data-toc-link data-depth={h.depth}>
                 {h.text}
               </a>
             </li>
@@ -101,57 +187,233 @@ const pad = (n: number) => String(n).padStart(2, '0');
       </aside>
     )
   }
+
+  <dialog class="image-lightbox" id="image-lightbox" aria-label="图片预览" data-pagefind-ignore>
+    <button class="lightbox-close" type="button" aria-label="关闭图片预览" data-lightbox-close>×</button>
+    <img id="lightbox-image" alt="" />
+    <p id="lightbox-caption"></p>
+  </dialog>
+  <span class="sr-only" id="article-live-status" role="status" aria-live="polite"></span>
 </BaseLayout>
 
 <script>
-  // 代码块复制按钮
-  document.querySelectorAll('.prose pre').forEach((pre) => {
+  const article = document.querySelector<HTMLElement>('.post-article');
+  const liveStatus = document.getElementById('article-live-status');
+
+  const copyText = async (value: string) => {
+    if (!navigator.clipboard?.writeText) throw new Error('Clipboard unavailable');
+    await navigator.clipboard.writeText(value);
+  };
+
+  // 标题直达锚点：点击复制链接，原生 id 仍能直接用于跳转。
+  article?.querySelectorAll<HTMLElement>('h2[id], h3[id], h4[id]').forEach((heading) => {
+    if (heading.closest('[data-footnotes]')) return;
+    const anchor = document.createElement('a');
+    anchor.className = 'heading-anchor';
+    anchor.href = `#${heading.id}`;
+    anchor.textContent = '¶';
+    anchor.setAttribute('aria-label', `复制“${heading.textContent?.trim() ?? '章节'}”的链接`);
+    anchor.addEventListener('click', async (event) => {
+      event.preventDefault();
+      try {
+        await copyText(`${window.location.origin}${window.location.pathname}#${heading.id}`);
+        if (liveStatus) liveStatus.textContent = '章节链接已复制';
+      } catch {
+        window.location.hash = heading.id;
+      }
+    });
+    heading.append(anchor);
+  });
+
+  // Mermaid 仅在包含图表的文章中动态加载，图表源码保留在折叠区内。
+  const mermaidBlocks = [...document.querySelectorAll<HTMLPreElement>('.prose pre[data-language="mermaid"]')];
+  if (mermaidBlocks.length) {
+    try {
+      const { default: mermaid } = await import('mermaid');
+      const diagrams: { source: string; visual: HTMLElement }[] = [];
+      let diagramId = 0;
+
+      const renderDiagrams = async () => {
+        const dark = document.documentElement.classList.contains('dark');
+        mermaid.initialize({
+          startOnLoad: false,
+          securityLevel: 'strict',
+          theme: dark ? 'dark' : 'default',
+          flowchart: { htmlLabels: false },
+        });
+        for (const diagram of diagrams) {
+          try {
+            const { svg, bindFunctions } = await mermaid.render(
+              `blog-mermaid-${++diagramId}`,
+              diagram.source,
+            );
+            diagram.visual.innerHTML = svg;
+            const rendered = diagram.visual.querySelector('svg');
+            rendered?.setAttribute('role', 'img');
+            if (rendered && !rendered.hasAttribute('aria-label') && !rendered.hasAttribute('aria-labelledby')) {
+              rendered.setAttribute('aria-label', '文章中的 Mermaid 图表');
+            }
+            bindFunctions?.(diagram.visual);
+          } catch (error) {
+            console.error('Mermaid rendering failed', error);
+            diagram.visual.textContent = '图表渲染失败，请展开源码检查语法。';
+            diagram.visual.classList.add('mermaid-error');
+          }
+        }
+      };
+
+      for (const pre of mermaidBlocks) {
+        const code = pre.querySelector('code');
+        if (!code) continue;
+        const source = code.textContent ?? '';
+        const figure = document.createElement('figure');
+        figure.className = 'mermaid-figure';
+        const visual = document.createElement('div');
+        visual.className = 'mermaid-diagram';
+        figure.append(visual);
+
+        const details = document.createElement('details');
+        details.className = 'mermaid-source';
+        const summary = document.createElement('summary');
+        summary.textContent = '查看图表源码';
+        details.append(summary, pre.cloneNode(true));
+        figure.append(details);
+        pre.replaceWith(figure);
+        diagrams.push({ source, visual });
+      }
+
+      await renderDiagrams();
+      window.addEventListener('theme-change', () => void renderDiagrams());
+    } catch (error) {
+      console.error('Mermaid could not be loaded', error);
+    }
+  }
+
+  // 保留现有代码复制体验；代码元信息和标题不进入复制内容。
+  document.querySelectorAll<HTMLPreElement>('.prose pre').forEach((pre) => {
+    if (pre.querySelector('.copy-btn')) return;
     const button = document.createElement('button');
     button.type = 'button';
     button.className = 'copy-btn';
     button.textContent = '复制';
+    button.setAttribute('aria-label', '复制代码');
     button.addEventListener('click', async () => {
       const code = pre.querySelector('code');
       try {
-        await navigator.clipboard.writeText(code?.innerText ?? '');
+        await copyText(code?.innerText ?? '');
         button.textContent = '已复制';
       } catch {
         button.textContent = '复制失败';
       }
       window.setTimeout(() => (button.textContent = '复制'), 1600);
     });
-    pre.appendChild(button);
+    pre.append(button);
   });
 
-  // 目录高亮当前小节
-  const links = [
-    ...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]'),
-  ];
-  if (links.length > 0) {
-    const map = new Map<string, HTMLAnchorElement>();
-    for (const link of links) {
-      const id = link.getAttribute('href')?.slice(1);
-      if (id) map.set(id, link);
-    }
-    const targets = [...map.keys()]
+  // 双目录同步当前章节，并在点击移动端目录项后收起目录。
+  const tocLinks = [...document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]')];
+  const tocById = new Map<string, HTMLAnchorElement[]>();
+  for (const link of tocLinks) {
+    const id = link.getAttribute('href')?.slice(1);
+    if (!id) continue;
+    tocById.set(id, [...(tocById.get(id) ?? []), link]);
+    link.addEventListener('click', () => {
+      document.querySelector<HTMLDetailsElement>('.toc-mobile')?.removeAttribute('open');
+    });
+  }
+  if (tocById.size) {
+    const targets = [...tocById.keys()]
       .map((id) => document.getElementById(id))
-      .filter((el): el is HTMLElement => el !== null);
-
-    const activate = (id: string) => {
-      for (const [key, link] of map) {
-        link.dataset.active = String(key === id);
-      }
-    };
-
+      .filter((element): element is HTMLElement => element !== null);
     const observer = new IntersectionObserver(
       (entries) => {
         const visible = entries
-          .filter((e) => e.isIntersecting)
+          .filter((entry) => entry.isIntersecting)
           .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
-        if (visible[0]) activate(visible[0].target.id);
+        if (!visible[0]) return;
+        for (const [id, links] of tocById) {
+          for (const link of links) link.dataset.active = String(id === visible[0].target.id);
+        }
       },
       { rootMargin: '-80px 0px -70% 0px' },
     );
-    targets.forEach((el) => observer.observe(el));
+    targets.forEach((element) => observer.observe(element));
   }
+
+  // 阅读进度与返回顶部。
+  const progress = document.getElementById('reading-progress');
+  const progressFill = progress?.querySelector<HTMLElement>('span');
+  const backToTop = document.getElementById('back-to-top');
+  let scheduled = false;
+  const updateReadingProgress = () => {
+    scheduled = false;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const percent = maxScroll > 0 ? Math.min(100, Math.max(0, (window.scrollY / maxScroll) * 100)) : 0;
+    if (progressFill) progressFill.style.transform = `scaleX(${percent / 100})`;
+    progress?.setAttribute('aria-valuenow', String(Math.round(percent)));
+    backToTop?.toggleAttribute('data-visible', window.scrollY > 400);
+  };
+  const scheduleProgress = () => {
+    if (scheduled) return;
+    scheduled = true;
+    window.requestAnimationFrame(updateReadingProgress);
+  };
+  window.addEventListener('scroll', scheduleProgress, { passive: true });
+  window.addEventListener('resize', scheduleProgress);
+  scheduleProgress();
+  backToTop?.addEventListener('click', () => {
+    window.scrollTo({
+      top: 0,
+      behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'instant' : 'smooth',
+    });
+  });
+
+  // 图片灯箱使用原生 dialog：Escape、焦点管理和键盘关闭由浏览器提供。
+  const lightbox = document.getElementById('image-lightbox') as HTMLDialogElement | null;
+  const lightboxImage = document.getElementById('lightbox-image') as HTMLImageElement | null;
+  const lightboxCaption = document.getElementById('lightbox-caption');
+  const closeLightbox = () => {
+    if (lightbox?.open) lightbox.close();
+  };
+  document.querySelectorAll<HTMLButtonElement>('[data-lightbox-trigger]').forEach((trigger) => {
+    trigger.addEventListener('click', () => {
+      const image = trigger.querySelector('img');
+      if (!image || !lightbox || !lightboxImage) return;
+      lightboxImage.src = image.currentSrc || image.src;
+      lightboxImage.alt = image.alt;
+      if (lightboxCaption) lightboxCaption.textContent = trigger.closest('figure')?.querySelector('figcaption')?.textContent ?? image.alt;
+      lightbox.showModal();
+    });
+  });
+  document.querySelector('[data-lightbox-close]')?.addEventListener('click', closeLightbox);
+  lightbox?.addEventListener('click', (event) => {
+    if (event.target === lightbox) closeLightbox();
+  });
+  lightbox?.addEventListener('close', () => {
+    if (lightboxImage) lightboxImage.removeAttribute('src');
+  });
+
+  // 原生分享优先；不支持 Web Share 时退回复制 URL。
+  const actionStatus = document.getElementById('post-action-status');
+  const articleUrl = new URL(window.location.pathname, window.location.origin).toString();
+  document.getElementById('copy-post-link')?.addEventListener('click', async () => {
+    try {
+      await copyText(articleUrl);
+      if (actionStatus) actionStatus.textContent = '文章链接已复制';
+    } catch {
+      if (actionStatus) actionStatus.textContent = '复制失败，请手动复制地址栏链接';
+    }
+  });
+  document.getElementById('share-post')?.addEventListener('click', async () => {
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: document.title, text: document.querySelector('meta[name="description"]')?.getAttribute('content') ?? '', url: articleUrl });
+      } else {
+        await copyText(articleUrl);
+        if (actionStatus) actionStatus.textContent = '文章链接已复制';
+      }
+    } catch (error) {
+      if ((error as DOMException).name !== 'AbortError' && actionStatus) actionStatus.textContent = '分享失败，可使用“复制链接”';
+    }
+  });
 </script>

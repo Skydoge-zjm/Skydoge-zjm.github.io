@@ -2,7 +2,7 @@
 import type { GetStaticPaths } from 'astro';
 import { render } from 'astro:content';
 import PostLayout from '../../layouts/PostLayout.astro';
-import { getPublishedPosts } from '../../lib/utils';
+import { getPublishedPosts, getRelatedPosts } from '../../lib/utils';
 
 export const getStaticPaths = (async () => {
   const posts = await getPublishedPosts();
@@ -13,14 +13,24 @@ export const getStaticPaths = (async () => {
       // 倒序排列：index + 1 是更早的文章，index - 1 是更新的文章
       prev: posts[index + 1],
       next: posts[index - 1],
+      related: getRelatedPosts(post, posts),
+      seriesPosts: post.data.series
+        ? posts
+            .filter((candidate) => candidate.data.series === post.data.series)
+            .sort((a, b) => {
+              const orderA = a.data.seriesOrder ?? a.data.pubDate.valueOf();
+              const orderB = b.data.seriesOrder ?? b.data.pubDate.valueOf();
+              return orderA - orderB;
+            })
+        : [],
     },
   }));
 }) satisfies GetStaticPaths;
 
-const { post, prev, next } = Astro.props;
+const { post, prev, next, related, seriesPosts } = Astro.props;
 const { Content, headings } = await render(post);
 ---
 
-<PostLayout post={post} headings={headings} prev={prev} next={next}>
+<PostLayout post={post} headings={headings} prev={prev} next={next} related={related} seriesPosts={seriesPosts}>
   <Content />
 </PostLayout>

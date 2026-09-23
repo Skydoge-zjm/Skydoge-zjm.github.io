@@ -1,4 +1,5 @@
-import { defineCollection, z } from 'astro:content';
+import { defineCollection } from 'astro:content';
+import { z } from 'astro/zod';
 import { glob } from 'astro/loaders';
 
 const blog = defineCollection({
@@ -15,10 +16,17 @@ const blog = defineCollection({
     updatedDate: z.coerce.date().optional(),
     /** 标签 */
     tags: z.array(z.string()).default([]),
+    /** 系列文章名称（可选） */
+    series: z.string().trim().min(1).optional(),
+    /** 系列内排序（可选；需要先设置 series） */
+    seriesOrder: z.number().int().positive().optional(),
     /** 置顶（可选） */
     pinned: z.boolean().default(false),
     /** 草稿（true 时不参与构建输出） */
     draft: z.boolean().default(false),
+  }).refine((data) => data.series || data.seriesOrder === undefined, {
+    path: ['seriesOrder'],
+    message: 'seriesOrder requires a series name',
   }),
 });
 

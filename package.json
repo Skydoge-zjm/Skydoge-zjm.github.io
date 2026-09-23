@@ -7,23 +7,30 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build && pagefind --site dist",
+    "check": "astro check",
     "preview": "astro preview",
     "new": "node scripts/new-post.mjs",
     "astro": "astro"
   },
   "dependencies": {
+    "@astrojs/markdown-satteri": "^0.4.2",
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "@fontsource-variable/newsreader": "^5.3.0",
     "@fontsource/ibm-plex-mono": "^5.3.0",
+    "@shikijs/transformers": "^4.4.3",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.3.3",
+    "katex": "^0.18.7",
+    "mermaid": "^11.17.2",
     "tailwindcss": "^4.3.3"
   },
   "devDependencies": {
-    "pagefind": "^1.5.2"
+    "@astrojs/check": "^0.9.10",
+    "pagefind": "^1.5.2",
+    "typescript": "~5.9.3"
   },
   "engines": {
-    "node": ">=20.19.0"
+    "node": ">=22.19.0"
   }
 }

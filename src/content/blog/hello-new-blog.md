@@ -3,6 +3,8 @@ title: "你好，新博客"
 description: "旧的 Hexo 模板博客退役了。这是用 Astro 从零重建的新家，以及我打算在这里写什么。"
 pubDate: 2026-09-21
 tags: ["随笔", "建站"]
+series: "用 Astro 搭建博客"
+seriesOrder: 1
 pinned: true
 ---
 
@@ -19,7 +21,6 @@ pinned: true
 - **[Astro](https://astro.build/)** —— 静态站点生成器，默认零 JS 输出，页面里只有内容和必要的交互
 - **[Tailwind CSS v4](https://tailwindcss.com/)** —— 样式全部手写，没有臃肿的主题包
 - **Pagefind** —— 本地全文搜索，索引在构建时生成，不依赖任何后端
-- **Giscus** —— 评论基于 GitHub Discussions，数据存在自己的仓库里
 
 整套东西的源码都在 [Skydoge-zjm/Skydoge-zjm.github.io](https://github.com/Skydoge-zjm/Skydoge-zjm.github.io)，每次 `git push` 由 GitHub Actions 自动构建部署，写作链路只有两步：`npm run new`，然后写字。
 

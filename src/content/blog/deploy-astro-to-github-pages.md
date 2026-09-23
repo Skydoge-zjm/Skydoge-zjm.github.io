@@ -3,6 +3,8 @@ title: "把 Astro 博客部署到 GitHub Pages"
 description: "从零到上线：Astro 项目 + GitHub Actions 自动构建 + 用户站点根路径部署的完整流程，以及搜索索引和评论的处理。"
 pubDate: 2026-09-18
 tags: ["Astro", "GitHub Pages", "部署"]
+series: "用 Astro 搭建博客"
+seriesOrder: 2
 ---
 
 搭个人博客，部署当然是越省事越好。GitHub Pages 免费、自带 CDN，配上 GitHub Actions 可以做到 `git push` 即上线。这篇记录本站的部署方案。

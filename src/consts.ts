@@ -33,27 +33,3 @@ export const SITE = {
   /** 每页文章数（首页「最近文章」） */
   homePostCount: 5,
 } as const;
-
-/**
- * Giscus 评论配置
- *
- * 开启步骤：
- *   1. 到 https://giscus.app 输入仓库 Skydoge-zjm/Skydoge-zjm.github.io
- *   2. 确认仓库已开启 Discussions（Settings → General → Features → Discussions）
- *   3. 选择分类（建议 Announcements），页面会生成一段 <script ...> 代码
- *   4. 把代码里的 data-repo-id / data-category-id 填到下面
- * 填好之后评论会自动出现在每篇文章底部；不填则整站不显示评论区。
- */
-export const GISCUS = {
-  repo: 'Skydoge-zjm/Skydoge-zjm.github.io',
-  repoId: '', // ← 填入 giscus.app 生成的 data-repo-id
-  category: 'Announcements',
-  categoryId: '', // ← 填入 giscus.app 生成的 data-category-id
-  mapping: 'pathname',
-  lang: 'zh-CN',
-  themeLight: 'light',
-  themeDark: 'dark_dimmed',
-} as const;
-
-/** Giscus 是否可用（三个 ID 齐全才启用） */
-export const GISCUS_ENABLED = Boolean(GISCUS.repoId && GISCUS.categoryId);

@@ -1,9 +1,11 @@
 ---
 interface Props {
   tag: string;
+  /** 将标签作为 Pagefind 可筛选字段索引 */
+  filterable?: boolean;
 }
 
-const { tag } = Astro.props;
+const { tag, filterable = false } = Astro.props;
 ---
 
-<a href={`/tags/${encodeURIComponent(tag)}`} class="chip">#{tag}</a>
+<a href={`/tags/${encodeURIComponent(tag)}`} class="chip" data-pagefind-filter={filterable ? 'tags' : undefined}>#{tag}</a>

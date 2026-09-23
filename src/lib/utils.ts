@@ -30,6 +30,30 @@ export async function getPublishedPosts(): Promise<Post[]> {
   );
 }
 
+/** 按共同标签推荐相关文章，优先标签重合度，再按日期倒序 */
+export function getRelatedPosts(post: Post, posts: Post[], limit = 3): Post[] {
+  const tags = new Set(post.data.tags);
+  if (tags.size === 0) return [];
+
+  return posts
+    .filter((candidate) => candidate.id !== post.id)
+    .map((candidate) => ({
+      post: candidate,
+      score: candidate.data.tags.reduce(
+        (count, tag) => count + Number(tags.has(tag)),
+        0,
+      ),
+    }))
+    .filter(({ score }) => score > 0)
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        b.post.data.pubDate.valueOf() - a.post.data.pubDate.valueOf(),
+    )
+    .slice(0, limit)
+    .map(({ post: candidate }) => candidate);
+}
+
 /** 所有标签及对应文章数，按文章数降序 */
 export function getTagCounts(posts: Post[]): Map<string, number> {
   const counts = new Map<string, number>();
