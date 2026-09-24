@@ -14,6 +14,8 @@ const blog = defineCollection({
     pubDate: z.coerce.date(),
     /** 更新日期（可选） */
     updatedDate: z.coerce.date().optional(),
+    /** 主分类：每篇文章唯一 */
+    category: z.string().trim().min(1),
     /** 标签 */
     tags: z.array(z.string()).default([]),
     /** 系列文章名称（可选） */

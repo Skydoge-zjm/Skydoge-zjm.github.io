@@ -1,0 +1,17 @@
+---
+interface Props {
+  category: string;
+  /** 将分类作为 Pagefind 可筛选字段索引 */
+  filterable?: boolean;
+}
+
+const { category, filterable = false } = Astro.props;
+---
+
+<a
+  href={`/blog/?category=${encodeURIComponent(category)}`}
+  class="category-label"
+  data-pagefind-filter={filterable ? 'category' : undefined}
+  data-tooltip={`按分类筛选：${category}`}
+  aria-label={`分类：${category}，点击筛选此分类`}
+>{category}</a>

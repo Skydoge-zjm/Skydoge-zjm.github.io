@@ -2,7 +2,8 @@
 title: "Markdown 功能演示"
 description: "验证数学公式、脚注、提示块、代码高亮、图表、图片和表格等排版能力。"
 pubDate: 2026-09-15
-tags: ["Markdown", "建站"]
+category: "写作工具"
+tags: ["Markdown"]
 ---
 
 这是本站的排版测试页，用来检查文章组件和 Markdown 增强功能在亮色、暗色与移动端的表现。

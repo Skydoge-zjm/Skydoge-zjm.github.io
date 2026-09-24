@@ -86,9 +86,129 @@ const jsonLdText = jsonLd
     <div class="shell">
       <Sidebar />
       <div class="content" data-pagefind-ignore={searchable ? undefined : ''}>
-        <slot />
+        <main class="page-main">
+          <slot />
+        </main>
         <Footer />
       </div>
     </div>
+    <div id="site-tooltip" class="site-tooltip" role="tooltip" aria-hidden="true" data-placement="top"></div>
+
+<script is:inline>
+  (() => {
+    const tooltip = document.getElementById('site-tooltip');
+    if (!tooltip) return;
+
+    let hoveredTarget = null;
+    let focusedTarget = null;
+    let currentTarget = null;
+    let describedTarget = null;
+
+    const setDescription = (target, enabled) => {
+      if (!(target instanceof HTMLElement)) return;
+      const ids = (target.getAttribute('aria-describedby') ?? '').split(/\s+/).filter(Boolean);
+      const next = enabled
+        ? [...new Set([...ids, tooltip.id])]
+        : ids.filter((id) => id !== tooltip.id);
+      if (next.length) target.setAttribute('aria-describedby', next.join(' '));
+      else target.removeAttribute('aria-describedby');
+    };
+
+    const position = (target) => {
+      const margin = 8;
+      const gap = 9;
+      const rect = target.getBoundingClientRect();
+      const viewportWidth = document.documentElement.clientWidth;
+      const viewportHeight = window.innerHeight;
+
+      tooltip.style.left = '0px';
+      tooltip.style.top = '0px';
+      const tip = tooltip.getBoundingClientRect();
+      const left = Math.max(margin, Math.min(
+        rect.left + (rect.width - tip.width) / 2,
+        viewportWidth - tip.width - margin,
+      ));
+      const arrowX = Math.max(10, Math.min(rect.left + rect.width / 2 - left, tip.width - 10));
+      let placement = target.dataset.tooltipPlacement === 'bottom' ? 'bottom' : 'top';
+      let top = placement === 'bottom' ? rect.bottom + gap : rect.top - tip.height - gap;
+
+      if (placement === 'top' && top < margin) {
+        placement = 'bottom';
+        top = rect.bottom + gap;
+      } else if (placement === 'bottom' && top + tip.height > viewportHeight - margin) {
+        placement = 'top';
+        top = rect.top - tip.height - gap;
+      }
+
+      if (rect.bottom < 0 || rect.top > viewportHeight) {
+        tooltip.dataset.visible = 'false';
+        return;
+      }
+
+      tooltip.dataset.placement = placement;
+      tooltip.style.left = `${left}px`;
+      tooltip.style.top = `${Math.max(margin, Math.min(top, viewportHeight - tip.height - margin))}px`;
+      tooltip.style.setProperty('--tooltip-arrow-x', `${arrowX}px`);
+      tooltip.dataset.visible = 'true';
+    };
+
+    const update = () => {
+      const target = focusedTarget || hoveredTarget;
+      if (describedTarget !== focusedTarget) {
+        if (describedTarget) setDescription(describedTarget, false);
+        if (focusedTarget) setDescription(focusedTarget, true);
+        describedTarget = focusedTarget;
+      }
+
+      if (!target || !target.dataset.tooltip?.trim()) {
+        currentTarget = null;
+        tooltip.dataset.visible = 'false';
+        tooltip.setAttribute('aria-hidden', 'true');
+        return;
+      }
+
+      tooltip.textContent = target.dataset.tooltip.trim();
+      tooltip.setAttribute('aria-hidden', 'false');
+      currentTarget = target;
+      position(target);
+    };
+
+    const tooltipTarget = (target) => target instanceof Element
+      ? target.closest('[data-tooltip]')
+      : null;
+    const relatedTargetIsInside = (target, relatedTarget) =>
+      relatedTarget instanceof Node && target.contains(relatedTarget);
+
+    document.addEventListener('pointerover', (event) => {
+      if (event.pointerType === 'touch') return;
+      const target = tooltipTarget(event.target);
+      if (!target || target === hoveredTarget) return;
+      hoveredTarget = target;
+      update();
+    });
+    document.addEventListener('pointerout', (event) => {
+      const target = tooltipTarget(event.target);
+      if (!target || target !== hoveredTarget || relatedTargetIsInside(target, event.relatedTarget)) return;
+      hoveredTarget = null;
+      update();
+    });
+    document.addEventListener('focusin', (event) => {
+      focusedTarget = tooltipTarget(event.target);
+      update();
+    });
+    document.addEventListener('focusout', (event) => {
+      const target = tooltipTarget(event.target);
+      if (!target || target !== focusedTarget || relatedTargetIsInside(target, event.relatedTarget)) return;
+      focusedTarget = null;
+      update();
+    });
+    document.addEventListener('click', (event) => {
+      const target = tooltipTarget(event.target);
+      if (target && target === currentTarget) requestAnimationFrame(update);
+    });
+    window.addEventListener('resize', () => currentTarget && position(currentTarget), { passive: true });
+    window.addEventListener('scroll', () => currentTarget && position(currentTarget), { capture: true, passive: true });
+  })();
+</script>
   </body>
 </html>

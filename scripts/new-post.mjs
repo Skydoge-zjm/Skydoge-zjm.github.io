@@ -49,6 +49,7 @@ const content = `---
 title: "${title}"
 description: "一句话摘要"
 pubDate: ${date}
+category: "分类名称"
 tags: []
 draft: true
 ---

@@ -41,31 +41,17 @@ export function getRelatedPosts(post: Post, posts: Post[], limit = 3): Post[] {
     .map(({ post: candidate }) => candidate);
 }
 
-/** 所有标签及对应文章数，按文章数降序 */
-export function getTagCounts(posts: Post[]): Map<string, number> {
+/** 主分类及文章数，按文章数降序、名称排序 */
+export function getCategoryCounts(posts: Post[]): Map<string, number> {
   const counts = new Map<string, number>();
   for (const post of posts) {
-    for (const tag of post.data.tags) {
-      counts.set(tag, (counts.get(tag) ?? 0) + 1);
-    }
+    counts.set(post.data.category, (counts.get(post.data.category) ?? 0) + 1);
   }
   return new Map(
     [...counts.entries()].sort((a, b) =>
       b[1] === a[1] ? a[0].localeCompare(b[0], 'zh') : b[1] - a[1],
     ),
   );
-}
-
-/** 按年份分组，年份降序、组内保持传入顺序 */
-export function groupByYear(posts: Post[]): [string, Post[]][] {
-  const groups = new Map<string, Post[]>();
-  for (const post of posts) {
-    const year = String(post.data.pubDate.getFullYear());
-    const list = groups.get(year) ?? [];
-    list.push(post);
-    groups.set(year, list);
-  }
-  return [...groups.entries()];
 }
 
 /**

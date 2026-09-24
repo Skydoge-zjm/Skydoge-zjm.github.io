@@ -2,6 +2,7 @@
 title: "把 Astro 博客部署到 GitHub Pages"
 description: "从零到上线：Astro 项目 + GitHub Actions 自动构建 + 用户站点根路径部署的完整流程，以及搜索索引的处理。"
 pubDate: 2026-09-18
+category: "建站"
 tags: ["Astro", "GitHub Pages", "部署"]
 ---
 

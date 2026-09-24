@@ -1,32 +1,90 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import PostCard from '../../components/PostCard.astro';
-import { getPublishedPosts, getTagCounts } from '../../lib/utils';
+import { getPublishedPosts, getCategoryCounts } from '../../lib/utils';
 
 const posts = await getPublishedPosts();
-const tags = [...getTagCounts(posts).keys()];
+const categories = [...getCategoryCounts(posts).keys()];
+const years = [...new Set(posts.map((post) => post.data.pubDate.getFullYear()))]
+  .sort((a, b) => b - a);
+const yearCounts = new Map(years.map((year) => [String(year), posts.filter((post) => post.data.pubDate.getFullYear() === year).length]));
+const requestedYear = Astro.url.searchParams.get('year') ?? '';
+const initialYear = years.some((year) => String(year) === requestedYear) ? requestedYear : '';
 ---
 
 <BaseLayout title="文章" description={`全部 ${posts.length} 篇文章`}>
   <div class="page-head">
-    <h1 class="page-title">文章</h1>
-    <p class="page-sub">共 <span class="num">{posts.length}</span> 篇</p>
+    <h1 class="page-title" data-tooltip="按分类或年份筛选文章" aria-describedby="article-filter-hint">文章</h1>
+    <span class="sr-only" id="article-filter-hint">按分类或年份筛选文章</span>
   </div>
 
   {
-    tags.length > 0 && (
-      <div class="mb-8 flex flex-wrap gap-1.5" role="group" aria-label="按标签筛选">
-        <button type="button" class="chip" data-tag="__all__" data-active="true">
-          全部
-        </button>
-        {tags.map((tag) => (
-          <button type="button" class="chip" data-tag={tag}>
-            #{tag}
+    (categories.length > 0 || years.length > 0) && (
+      <div class="blog-filters">
+        <div class="blog-filter-groups">
+          {categories.length > 0 && (
+            <div class="blog-filter-line">
+              <span class="blog-filter-caption">分类</span>
+              <div class="blog-category-filters" role="group" aria-label="按分类筛选">
+                <button type="button" class="chip" data-category="" data-active="true" aria-pressed="true">
+                  全部
+                </button>
+                {categories.map((category) => (
+                  <button type="button" class="chip" data-category={category} aria-pressed="false">
+                    {category}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <div class="blog-year-dropdown" data-year-dropdown>
+          <button
+            id="year-filter-trigger"
+            type="button"
+            class="blog-year-trigger"
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-controls="year-filter-options"
+            aria-label={`按年份筛选，当前${initialYear || '全部年份'}`}
+          >
+            <svg class="blog-year-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect x="3.5" y="5" width="17" height="15.5" rx="2"></rect>
+              <path d="M7.5 3.5v3M16.5 3.5v3M3.5 9.5h17"></path>
+            </svg>
+            <span class="blog-year-caption">年份</span>
+            <span class="blog-year-value" id="year-filter-value">{initialYear || '全部年份'}</span>
+            <svg class="blog-year-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="m5 7.5 5 5 5-5"></path>
+            </svg>
           </button>
-        ))}
+          <div id="year-filter-options" class="blog-year-menu" role="listbox" aria-label="按年份筛选" hidden>
+            <div class="blog-year-option blog-year-option--all" role="option" tabindex={initialYear ? '-1' : '0'} data-year-option="" aria-selected={!initialYear}>
+              <span class="blog-year-check" aria-hidden="true">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 3.2 3.2L13 4.5"></path></svg>
+              </span>
+              <span>全部年份</span>
+              <span class="blog-year-count">{posts.length}</span>
+            </div>
+            {years.map((year) => (
+              <div class="blog-year-option" role="option" tabindex={initialYear === String(year) ? '0' : '-1'} data-year-option={String(year)} aria-selected={initialYear === String(year)}>
+                <span class="blog-year-check" aria-hidden="true">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 8 3.2 3.2L13 4.5"></path></svg>
+                </span>
+                <span>{year}</span>
+                <span class="blog-year-count">{yearCounts.get(String(year))}</span>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }
+
+  <p class="blog-filter-status empty-note" id="filter-status" role="status" aria-live="polite">
+    共 {posts.length} 篇
+  </p>
+  <p class="empty-note mt-6" id="filter-empty" hidden>没有符合条件的文章。</p>
 
   <ul class="ledger" id="post-list">
     {posts.map((post) => <PostCard post={post} filterable />)}
@@ -34,26 +92,153 @@ const tags = [...getTagCounts(posts).keys()];
 </BaseLayout>
 
 <script>
-  const buttons = document.querySelectorAll<HTMLButtonElement>('[data-tag]');
-  const items = document.querySelectorAll<HTMLElement>('#post-list [data-tags]');
+  const categoryButtons = document.querySelectorAll<HTMLButtonElement>('button[data-category]');
+  const yearDropdown = document.querySelector<HTMLElement>('[data-year-dropdown]');
+  const yearTrigger = document.getElementById('year-filter-trigger') as HTMLButtonElement | null;
+  const yearMenu = document.getElementById('year-filter-options');
+  const yearValue = document.getElementById('year-filter-value');
+  const yearOptions = [...document.querySelectorAll<HTMLElement>('[data-year-option]')];
+  const items = document.querySelectorAll<HTMLElement>('#post-list [data-category]');
+  const status = document.getElementById('filter-status');
+  const empty = document.getElementById('filter-empty');
 
-  const apply = (tag: string) => {
-    buttons.forEach((button) => {
-      button.dataset.active = String(button.dataset.tag === tag);
+  const apply = (category: string, year: string, updateUrl = true) => {
+    const validCategory = [...categoryButtons].some((button) => button.dataset.category === category)
+      ? category
+      : '';
+    const validYear = yearOptions.some((option) => option.dataset.yearOption === year)
+      ? year
+      : '';
+    let visibleCount = 0;
+
+    categoryButtons.forEach((button) => {
+      const active = button.dataset.category === validCategory;
+      button.dataset.active = String(active);
+      button.setAttribute('aria-pressed', String(active));
+    });
+    const selectedYearOption = yearOptions.find((option) => option.dataset.yearOption === validYear);
+    if (yearValue) yearValue.textContent = selectedYearOption?.querySelector('span:nth-child(2)')?.textContent ?? '全部年份';
+    yearTrigger?.setAttribute('aria-label', `按年份筛选，当前${yearValue?.textContent ?? '全部年份'}`);
+    yearOptions.forEach((option) => {
+      option.setAttribute('aria-selected', String(option === selectedYearOption));
+      option.tabIndex = Number(option === selectedYearOption);
     });
     items.forEach((item) => {
-      const itemTags = (item.dataset.tags ?? '').split(',').filter(Boolean);
-      item.hidden = tag !== '__all__' && !itemTags.includes(tag);
+      const matchesCategory = !validCategory || item.dataset.category === validCategory;
+      const matchesYear = !validYear || item.dataset.year === validYear;
+      item.hidden = !(matchesCategory && matchesYear);
+      if (!item.hidden) visibleCount += 1;
     });
+
+    if (status) status.textContent = `显示 ${visibleCount} 篇`;
+    if (empty) empty.hidden = visibleCount > 0;
+
+    if (updateUrl) {
+      const url = new URL(window.location.href);
+      validCategory ? url.searchParams.set('category', validCategory) : url.searchParams.delete('category');
+      validYear ? url.searchParams.set('year', validYear) : url.searchParams.delete('year');
+      window.history.pushState({}, '', `${url.pathname}${url.search}${url.hash}`);
+    }
   };
 
-  buttons.forEach((button) =>
-    button.addEventListener('click', () =>
-      apply(button.dataset.tag ?? '__all__'),
-    ),
-  );
+  const selectedCategory = () => [...categoryButtons].find((button) => button.getAttribute('aria-pressed') === 'true')?.dataset.category ?? '';
+  const selectedYear = () => yearOptions.find((option) => option.getAttribute('aria-selected') === 'true')?.dataset.yearOption ?? '';
 
-  // 支持通过 ?tag=xxx 直达某个标签的筛选状态
-  const initial = new URLSearchParams(window.location.search).get('tag');
-  if (initial) apply(initial);
+  categoryButtons.forEach((button) => button.addEventListener('click', () => {
+    apply(button.dataset.category ?? '', selectedYear());
+  }));
+
+  const closeYearMenu = (restoreFocus = false) => {
+    if (!yearMenu || !yearTrigger) return;
+    yearMenu.hidden = true;
+    yearTrigger.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) yearTrigger.focus();
+  };
+  const openYearMenu = () => {
+    if (!yearMenu || !yearTrigger) return;
+    yearMenu.hidden = false;
+    yearTrigger.setAttribute('aria-expanded', 'true');
+    const active = yearOptions.find((option) => option.getAttribute('aria-selected') === 'true') ?? yearOptions[0];
+    yearOptions.forEach((option) => { option.tabIndex = Number(option === active); });
+    active?.focus();
+  };
+  const moveFocusOutsideYearDropdown = (reverse: boolean) => {
+    if (!yearDropdown) return;
+    const selector = 'a[href], button, input, select, textarea, summary, [tabindex], [contenteditable="true"]';
+    const stops = [...document.querySelectorAll<HTMLElement>(selector)].filter((element) =>
+      element instanceof HTMLElement &&
+      element.tabIndex >= 0 &&
+      !element.matches(':disabled') &&
+      !element.closest('[hidden]') &&
+      getComputedStyle(element).visibility !== 'hidden' &&
+      element.getClientRects().length > 0,
+    );
+    const inside = stops.flatMap((element, index) => yearDropdown.contains(element) ? [index] : []);
+    const boundary = reverse ? Math.min(...inside) - 1 : Math.max(...inside) + 1;
+    const destination = stops[boundary];
+
+    closeYearMenu();
+    if (destination) destination.focus();
+    else if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+  };
+
+  yearTrigger?.addEventListener('click', () => {
+    if (yearMenu?.hidden) openYearMenu();
+    else closeYearMenu();
+  });
+  yearOptions.forEach((option, index) => {
+    option.addEventListener('click', () => {
+      apply(selectedCategory(), option.dataset.yearOption ?? '');
+      closeYearMenu(true);
+    });
+    option.addEventListener('keydown', (event) => {
+      let next = index;
+      if (event.key === 'ArrowDown') next = (index + 1) % yearOptions.length;
+      else if (event.key === 'ArrowUp') next = (index - 1 + yearOptions.length) % yearOptions.length;
+      else if (event.key === 'Home') next = 0;
+      else if (event.key === 'End') next = yearOptions.length - 1;
+      else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeYearMenu(true);
+        return;
+      } else if (event.key === 'Enter' || event.key === ' ') {
+        event.preventDefault();
+        option.click();
+        return;
+      } else if (event.key === 'Tab') {
+        event.preventDefault();
+        moveFocusOutsideYearDropdown(event.shiftKey);
+        return;
+      } else return;
+
+      event.preventDefault();
+      const nextOption = yearOptions[next];
+      yearOptions.forEach((item) => { item.tabIndex = Number(item === nextOption); });
+      nextOption?.focus();
+    });
+  });
+  yearTrigger?.addEventListener('keydown', (event) => {
+    if (event.key === 'ArrowDown' || event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openYearMenu();
+    }
+  });
+  document.addEventListener('pointerdown', (event) => {
+    if (yearDropdown && event.target instanceof Node && !yearDropdown.contains(event.target)) {
+      closeYearMenu(yearMenu?.contains(document.activeElement) ?? false);
+    }
+  });
+
+  yearDropdown?.addEventListener('focusout', (event) => {
+    if (!(event.relatedTarget instanceof Node) || !yearDropdown.contains(event.relatedTarget)) {
+      closeYearMenu();
+    }
+  });
+
+  const applyLocation = () => {
+    const params = new URLSearchParams(window.location.search);
+    apply(params.get('category') ?? '', params.get('year') ?? '', false);
+  };
+  window.addEventListener('popstate', applyLocation);
+  applyLocation();
 </script>

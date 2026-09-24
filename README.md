@@ -28,9 +28,7 @@ src/
 ├── components/           # Sidebar / Footer / PostCard / Tag / ThemeToggle ...
 └── pages/                # 路由即文件
     ├── index.astro       # 首页
-    ├── blog/             # 文章列表 + 文章详情
-    ├── tags/             # 标签页
-    ├── archives.astro    # 归档
+    ├── blog/             # 文章列表（标签/年份筛选）+ 文章详情
     ├── about.astro       # 关于
     ├── links.astro       # 友链
     ├── search.astro      # 搜索
@@ -55,6 +53,7 @@ npm run new -- "文章标题" my-post
 title: "文章标题"
 description: "一句话摘要，显示在列表页和 RSS 里"
 pubDate: 2026-09-21
+category: "主分类"
 tags: ["标签一", "标签二"]
 draft: false
 pinned: false        # 可选，置顶
@@ -122,6 +121,8 @@ console.log(newValue); // [!code highlight]
 
 Frontmatter 可选添加 `series` 和 `seriesOrder`。同系列文章会展示系列目录；没有同标签相关文章时不会出现空推荐区。文章页还包含移动端目录、阅读进度、分享/复制链接、打印样式和 BlogPosting 结构化数据。
 
+每篇文章必须设置一个主分类，用于组织和筛选文章；标签可设置多个，用于补充关键词并参与全文搜索，不单独作为筛选条件。
+
 ## 功能说明
 
 | 功能 | 实现方式 |
@@ -131,7 +132,7 @@ Frontmatter 可选添加 `series` 和 `seriesOrder`。同系列文章会展示�
 | 代码高亮 | Shiki 双主题、文件名、行号、行高亮/diff、复制按钮 |
 | 图片 | 替代文本诊断、延迟加载、说明文字和键盘可用灯箱 |
 | 阅读体验 | 响应式目录、章节链接、阅读进度、返回顶部、分享与复制 |
-| 文章发现 | 标签筛选、Pagefind 搜索快捷键、相关文章、系列文章 |
+| 文章发现 | 文章页按分类/年份筛选、Pagefind 全文搜索快捷键、相关文章、系列文章；标签作为文章关键词展示 |
 | SEO / 输出 | canonical、Open Graph、BlogPosting JSON-LD、打印样式 |
 | 搜索 | Pagefind，构建时生成到 `dist/pagefind/`，纯本地无后端 |
 | RSS | `/rss.xml`，由 `@astrojs/rss` 生成 |

@@ -2,11 +2,10 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/PostCard.astro';
 import { SITE } from '../consts';
-import { getPublishedPosts, getTagCounts } from '../lib/utils';
+import { getPublishedPosts } from '../lib/utils';
 import { PROJECTS } from '../data/projects';
 
 const posts = await getPublishedPosts();
-const tagCounts = getTagCounts(posts);
 const placeholderSlots = ['01', '02'];
 ---
 
@@ -15,7 +14,7 @@ const placeholderSlots = ['01', '02'];
     <p class="hero-kicker rise rise-1">
       <span class="prompt">$</span> journal
     </p>
-    <h1 class="hero-title rise rise-2">写代码，也写字。</h1>
+    <h1 class="hero-title rise rise-2">Skydoge 的笔记</h1>
     <p class="hero-lede rise rise-3">
       {SITE.name} 的技术笔记、踩坑记录，偶尔胡思乱想。把值得回头看的东西，慢慢写下来。
     </p>
@@ -39,64 +38,47 @@ const placeholderSlots = ['01', '02'];
     )
   }
 
-  {
-    <section class="home-section" aria-labelledby="projects-title">
-      <div class="home-section-head">
-        <p class="section-label" id="projects-title">个人项目</p>
-        <span class="section-note">持续补充</span>
-      </div>
-      {
-        PROJECTS.length > 0 ? (
-          <div class="project-list">
-            {PROJECTS.map((project) => (
-              <article class="project-item">
-                <a href={project.href} class="project-media" aria-label={`打开项目：${project.name}`}>
-                  <img src={project.image} alt={project.imageAlt} loading="lazy" decoding="async" />
-                </a>
-                <div class="project-copy">
-                  <div class="project-meta">
-                    {project.tags.map((tag) => <span>{tag}</span>)}
-                  </div>
-                  <h2 class="project-name"><a href={project.href}>{project.name}</a></h2>
-                  <p class="project-description">{project.description}</p>
-                  <div class="project-links">
-                    <a href={project.href} class="text-action">查看项目 <span aria-hidden="true">→</span></a>
-                    {project.source && <a href={project.source} class="text-action" target="_blank" rel="noopener noreferrer">源代码 <span aria-hidden="true">↗</span></a>}
-                  </div>
+  <section class="home-section" aria-labelledby="projects-title">
+    <div class="home-section-head">
+      <p class="section-label" id="projects-title">做过的东西</p>
+    </div>
+    {
+      PROJECTS.length > 0 ? (
+        <div class="project-list">
+          {PROJECTS.map((project) => (
+            <article class="project-item">
+              <a href={project.href} class="project-media" aria-label={`打开项目：${project.name}`}>
+                <img src={project.image} alt={project.imageAlt} loading="lazy" decoding="async" />
+              </a>
+              <div class="project-copy">
+                <div class="project-meta">
+                  {project.tags.map((tag) => <span>{tag}</span>)}
                 </div>
-              </article>
-            ))}
-          </div>
-        ) : (
-          <div class="project-placeholder-grid" aria-label="项目展示预留位置">
-            {placeholderSlots.map((slot) => (
-              <div class="project-placeholder" aria-hidden="true">
-                <span class="project-placeholder-index">{slot}</span>
-                <span class="project-placeholder-label">项目截图预留</span>
+                <h2 class="project-name"><a href={project.href}>{project.name}</a></h2>
+                <p class="project-description">{project.description}</p>
+                <div class="project-links">
+                  <a href={project.href} class="text-action">查看项目 <span aria-hidden="true">→</span></a>
+                  {project.source && <a href={project.source} class="text-action" target="_blank" rel="noopener noreferrer">源代码 <span aria-hidden="true">↗</span></a>}
+                </div>
               </div>
-            ))}
-          </div>
-        )
-      }
-    </section>
-  }
-
-  {
-    tagCounts.size > 0 && (
-      <section class="home-section" aria-labelledby="topics-title">
-        <div class="home-section-head">
-          <p class="section-label" id="topics-title">按主题浏览</p>
-          <a href="/tags/" class="section-action">全部标签 <span aria-hidden="true">→</span></a>
-        </div>
-        <nav class="topic-list" aria-label="文章主题">
-          {[...tagCounts.entries()].map(([tag, count]) => (
-            <a href={`/tags/${encodeURIComponent(tag)}`} class="topic-link">
-              <span>#{tag}</span>
-              <span class="topic-count">{String(count).padStart(2, '0')}</span>
-            </a>
+            </article>
           ))}
-        </nav>
-      </section>
-    )
-  }
+        </div>
+      ) : (
+        <div class="project-list project-list--placeholder" aria-label="个人项目资料待补">
+          {placeholderSlots.map((slot) => (
+            <article class="project-item project-item--placeholder">
+              <div class="project-media project-media--placeholder" aria-hidden="true">
+                <span>{slot}</span>
+              </div>
+              <div class="project-copy">
+                <h2 class="project-name">项目资料待补</h2>
+                <p class="project-description">截图、简介与项目链接</p>
+              </div>
+            </article>
+          ))}
+        </div>
+      )
+    }
+  </section>
 </BaseLayout>

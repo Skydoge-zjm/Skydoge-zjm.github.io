@@ -1,10 +1,11 @@
 ---
 import type { CollectionEntry } from 'astro:content';
 import Tag from './Tag.astro';
+import Category from './Category.astro';
 
 interface Props {
   post: CollectionEntry<'blog'>;
-  /** 输出 data-tags 属性，供文章页客户端标签筛选使用 */
+  /** 输出分类和年份字段，供文章列表客户端筛选使用 */
   filterable?: boolean;
 }
 
@@ -13,8 +14,13 @@ const pad = (n: number) => String(n).padStart(2, '0');
 const date = `${pad(post.data.pubDate.getMonth() + 1)}-${pad(post.data.pubDate.getDate())}`;
 ---
 
-<li class="ledger-row" data-tags={filterable ? post.data.tags.join(',') : undefined}>
+<li
+  class="ledger-row"
+  data-year={filterable ? String(post.data.pubDate.getFullYear()) : undefined}
+  data-category={filterable ? post.data.category : undefined}
+>
   <span class="ledger-date">{date}</span>
+  <Category category={post.data.category} />
 
   <a href={`/blog/${post.id}/`} class="ledger-title">
     {post.data.title}

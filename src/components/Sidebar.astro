@@ -18,7 +18,7 @@ const isActive = (href: string) =>
     </a>
 
     <div class="rail-actions">
-      <a href="/search" class="icon-btn" aria-label="搜索">
+      <a href="/search" class="icon-btn" aria-label="搜索" data-tooltip="搜索" data-tooltip-placement="bottom">
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -41,6 +41,8 @@ const isActive = (href: string) =>
         aria-label="打开菜单"
         aria-expanded="false"
         aria-controls="rail-nav"
+        data-tooltip="打开菜单"
+        data-tooltip-placement="bottom"
       >
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -95,6 +97,8 @@ const isActive = (href: string) =>
     const open = rail?.dataset.open === 'true';
     if (rail) rail.dataset.open = String(!open);
     button.setAttribute('aria-expanded', String(!open));
-    button.setAttribute('aria-label', open ? '打开菜单' : '关闭菜单');
+    const label = open ? '打开菜单' : '关闭菜单';
+    button.setAttribute('aria-label', label);
+    button.dataset.tooltip = label;
   });
 </script>

@@ -19,8 +19,6 @@ export const SITE = {
   /** 顶部导航 */
   nav: [
     { text: '文章', href: '/blog' },
-    { text: '标签', href: '/tags' },
-    { text: '归档', href: '/archives' },
     { text: '关于', href: '/about' },
     { text: '友链', href: '/links' },
   ],
