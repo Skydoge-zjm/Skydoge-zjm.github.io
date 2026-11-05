@@ -701,6 +701,13 @@
     font-size: 0.66rem;
   }
 
+  /* 入场动画会创建层叠上下文，让筛选菜单始终位于后续列表之上。 */
+  .blog-filters,
+  .search-controls {
+    position: relative;
+    z-index: 1;
+  }
+
   .blog-filters {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
