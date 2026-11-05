@@ -25,7 +25,8 @@ export const SITE = {
   /** 社交链接 */
   social: {
     github: 'https://github.com/Skydoge-zjm',
-    email: '2984095138@qq.com',
+    email: 'jmzhangskydoge@gmail.com',
+    backupEmail: '2984095138@qq.com',
     rss: '/rss.xml',
   },
   /** 每页文章数（首页「最近文章」） */

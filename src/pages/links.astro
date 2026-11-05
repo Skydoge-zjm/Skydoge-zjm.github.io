@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { SITE } from '../consts';
 ---
 
 <BaseLayout title="友链" description="一些常逛的网站和朋友们的博客">
@@ -45,7 +46,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <h2 class="text-sm font-medium">申请友链</h2>
     <p class="mt-2 text-sm leading-relaxed text-fg-muted">
       在本页评论区留言，或发邮件到
-      <a href="mailto:2984095138@qq.com" class="text-accent">2984095138@qq.com</a>。
+      <a href={`mailto:${SITE.social.email}`} class="text-accent">{SITE.social.email}</a>。
       格式：<code class="font-mono text-xs">名称 / 站点地址 / 一句话介绍</code>。
       原则上不设门槛，内容能长期访问即可。
     </p>
