@@ -83,10 +83,11 @@ const jsonLdText = jsonLd
   </head>
 
   <body>
+    <a class="skip-link" href="#main-content">跳至正文</a>
     <div class="shell">
       <Sidebar />
       <div class="content" data-pagefind-ignore={searchable ? undefined : ''}>
-        <main class="page-main">
+        <main class="page-main" id="main-content" tabindex="-1">
           <slot />
         </main>
         <Footer />

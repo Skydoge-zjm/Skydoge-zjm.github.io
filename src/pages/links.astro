@@ -6,7 +6,7 @@ import { SITE } from '../consts';
 <BaseLayout title="友链" description="一些常逛的网站和朋友们的博客">
   <div class="page-head">
     <h1 class="page-title">友链</h1>
-    <p class="page-sub">一些常逛的网站。想交换友链的话，在下面留言或发邮件都行。</p>
+    <p class="page-sub">一些常逛的网站。想交换友链，欢迎发邮件来聊。</p>
   </div>
 
   <!-- ↓↓↓ 按下面的格式增删友链 ↓↓↓ -->
@@ -45,10 +45,11 @@ import { SITE } from '../consts';
   <div class="panel mt-12">
     <h2 class="text-sm font-medium">申请友链</h2>
     <p class="mt-2 text-sm leading-relaxed text-fg-muted">
-      在本页评论区留言，或发邮件到
+      发邮件到
       <a href={`mailto:${SITE.social.email}`} class="text-accent">{SITE.social.email}</a>。
       格式：<code class="font-mono text-xs">名称 / 站点地址 / 一句话介绍</code>。
       原则上不设门槛，内容能长期访问即可。
     </p>
+    <a href={`mailto:${SITE.social.email}?subject=${encodeURIComponent('友链申请')}`} class="text-action friend-link-action">发送友链申请 <span aria-hidden="true">↗</span></a>
   </div>
 </BaseLayout>

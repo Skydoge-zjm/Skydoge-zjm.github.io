@@ -155,7 +155,7 @@ const categories = [...getCategoryCounts(posts).keys()];
           pagefind = await import('/pagefind/pagefind.js');
           await pagefind.options({ excerptLength: 28, bundlePath: '/pagefind/' });
         } catch {
-          status.textContent = '搜索索引尚未生成：请先执行 npm run build。';
+          status.textContent = '搜索暂时不可用，请稍后重试。';
         }
       })();
       return loading;
@@ -166,7 +166,7 @@ const categories = [...getCategoryCounts(posts).keys()];
       const category = selectedCategory();
       if (!query && !category) {
         list.replaceChildren();
-        status.textContent = '输入关键词或选择分类、标签开始搜索。';
+        status.textContent = '输入关键词或选择分类开始搜索。';
         return;
       }
 
@@ -210,19 +210,18 @@ const categories = [...getCategoryCounts(posts).keys()];
       status.textContent = `找到 ${total} 篇${selectedCategory ? `（分类「${selectedCategory}」）` : ''}文章`;
       for (const item of items) {
         const li = document.createElement('li');
-        li.className = 'ledger-row';
-        li.style.gridTemplateColumns = '1fr';
+        li.className = 'ledger-row search-result';
 
         const link = document.createElement('a');
         link.href = item.url;
-        link.className = 'ledger-title';
+        link.className = 'search-result-link';
 
         const title = document.createElement('span');
-        title.className = 'block';
+        title.className = 'ledger-title';
         title.textContent = item.title || (item.meta && item.meta.title) || item.url;
 
         const excerpt = document.createElement('span');
-        excerpt.className = 'mt-1 block text-sm leading-relaxed text-fg-muted';
+        excerpt.className = 'ledger-description';
         if (item.excerptHtml === false) {
           excerpt.textContent = item.excerpt || '';
         } else {

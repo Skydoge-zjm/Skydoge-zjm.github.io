@@ -2,42 +2,44 @@
 import type { CollectionEntry } from 'astro:content';
 import Tag from './Tag.astro';
 import Category from './Category.astro';
+import { formatDate } from '../lib/utils';
 
 interface Props {
   post: CollectionEntry<'blog'>;
   /** 输出分类和年份字段，供文章列表客户端筛选使用 */
   filterable?: boolean;
+  /** 首页首篇文章使用更明确的视觉层级 */
+  featured?: boolean;
+  headingLevel?: 'h2' | 'h3';
 }
 
-const { post, filterable = false } = Astro.props;
-const pad = (n: number) => String(n).padStart(2, '0');
-const date = `${pad(post.data.pubDate.getMonth() + 1)}-${pad(post.data.pubDate.getDate())}`;
+const { post, filterable = false, featured = false, headingLevel: Heading = 'h2' } = Astro.props;
+const tags = post.data.tags.slice(0, 2);
 ---
 
 <li
-  class="ledger-row"
+  class:list={['ledger-row', { 'ledger-row--featured': featured }]}
   data-year={filterable ? String(post.data.pubDate.getFullYear()) : undefined}
   data-category={filterable ? post.data.category : undefined}
 >
-  <span class="ledger-date">{date}</span>
-  <Category category={post.data.category} />
-
-  <a href={`/blog/${post.id}/`} class="ledger-title">
-    {post.data.title}
-    {
-      post.data.pinned && (
-        <span class="ledger-pin">置顶</span>
-      )
-    }
-  </a>
-
-  {
-    post.data.tags.length > 0 && (
-      <span class="ledger-tags">
-        {post.data.tags.map((tag) => (
-          <Tag tag={tag} />
-        ))}
-      </span>
-    )
-  }
+  <div class="ledger-copy">
+    {featured && <p class="ledger-eyebrow">最近一篇</p>}
+    <Heading class="ledger-heading">
+      <a href={`/blog/${post.id}/`} class="ledger-title">
+        {post.data.title}
+        {post.data.pinned && <span class="ledger-pin">置顶</span>}
+      </a>
+    </Heading>
+    <p class="ledger-description">{post.data.description}</p>
+    <div class="ledger-meta">
+      <time class="ledger-date" datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+      <Category category={post.data.category} />
+      {tags.length > 0 && (
+        <span class="ledger-tags">
+          {tags.map((tag) => <Tag tag={tag} />)}
+        </span>
+      )}
+    </div>
+  </div>
+  <span class="ledger-arrow" aria-hidden="true">↗</span>
 </li>

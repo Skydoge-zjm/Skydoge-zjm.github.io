@@ -5,6 +5,7 @@ import { SITE } from '../consts';
 const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const isActive = (href: string) =>
   href === '/' ? path === '/' : path === href || path.startsWith(href + '/');
+const navigation = [{ text: '首页', href: '/' }, ...SITE.nav];
 ---
 
 <aside class="rail" data-open="false" data-pagefind-ignore>
@@ -18,7 +19,7 @@ const isActive = (href: string) =>
     </a>
 
     <div class="rail-actions">
-      <a href="/search" class="icon-btn" aria-label="搜索" data-tooltip="搜索" data-tooltip-placement="bottom">
+      <a href="/search" class="icon-btn rail-search" aria-label="搜索文章" data-tooltip="搜索文章" data-tooltip-placement="bottom" aria-current={path === '/search' ? 'page' : undefined}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           viewBox="0 0 24 24"
@@ -32,6 +33,7 @@ const isActive = (href: string) =>
           <circle cx="11" cy="11" r="8"></circle>
           <path d="m21 21-4.3-4.3"></path>
         </svg>
+        <span class="rail-search-label">搜索文章</span>
       </a>
       <ThemeToggle />
       <button
@@ -62,7 +64,7 @@ const isActive = (href: string) =>
 
   <nav class="rail-nav" id="rail-nav" aria-label="主导航">
     {
-      SITE.nav.map((item) => (
+      navigation.map((item) => (
         <a
           href={item.href}
           class="rail-link"
@@ -93,12 +95,26 @@ const isActive = (href: string) =>
   const rail = document.querySelector<HTMLElement>('.rail');
   const button = document.getElementById('rail-menu-btn');
 
-  button?.addEventListener('click', () => {
-    const open = rail?.dataset.open === 'true';
-    if (rail) rail.dataset.open = String(!open);
-    button.setAttribute('aria-expanded', String(!open));
-    const label = open ? '打开菜单' : '关闭菜单';
-    button.setAttribute('aria-label', label);
-    button.dataset.tooltip = label;
+  const setOpen = (open: boolean) => {
+    if (rail) rail.dataset.open = String(open);
+    button?.setAttribute('aria-expanded', String(open));
+    const label = open ? '关闭菜单' : '打开菜单';
+    button?.setAttribute('aria-label', label);
+    if (button) button.dataset.tooltip = label;
+  };
+
+  button?.addEventListener('click', () => setOpen(rail?.dataset.open !== 'true'));
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape' && rail?.dataset.open === 'true') {
+      setOpen(false);
+      button?.focus();
+    }
   });
+  document.addEventListener('pointerdown', (event) => {
+    if (event.target instanceof Node && rail && !rail.contains(event.target)) setOpen(false);
+  });
+  rail?.addEventListener('focusout', (event) => {
+    if (!(event.relatedTarget instanceof Node) || !rail.contains(event.relatedTarget)) setOpen(false);
+  });
+  window.matchMedia('(min-width: 1024px)').addEventListener('change', () => setOpen(false));
 </script>

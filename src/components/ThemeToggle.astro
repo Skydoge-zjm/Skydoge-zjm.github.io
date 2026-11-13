@@ -1,5 +1,5 @@
 ---
-const label = '切换亮/暗模式';
+const label = '深色模式';
 ---
 
 <button
@@ -7,6 +7,7 @@ const label = '切换亮/暗模式';
   type="button"
   class="icon-btn"
   aria-label={label}
+  aria-pressed="false"
   data-tooltip={label}
   data-tooltip-placement="bottom"
 >
@@ -44,6 +45,20 @@ const label = '切换亮/暗模式';
 <script>
   const root = document.documentElement;
   const button = document.getElementById('theme-toggle');
+  const preference = window.matchMedia('(prefers-color-scheme: dark)');
+
+  const updateButton = () => {
+    const dark = root.classList.contains('dark');
+    button?.setAttribute('aria-pressed', String(dark));
+    if (button) button.dataset.tooltip = dark ? '切换为浅色模式' : '切换为深色模式';
+  };
+  const announceTheme = () => {
+    updateButton();
+    window.dispatchEvent(new CustomEvent('theme-change', {
+      detail: root.classList.contains('dark') ? 'dark' : 'light',
+    }));
+  };
+  updateButton();
 
   button?.addEventListener('click', () => {
     const isDark = root.classList.toggle('dark');
@@ -52,9 +67,14 @@ const label = '切换亮/暗模式';
     } catch (e) {
       /* 隐私模式下忽略 */
     }
-    // 通知需要跟随主题的图表等组件
-    window.dispatchEvent(
-      new CustomEvent('theme-change', { detail: isDark ? 'dark' : 'light' }),
-    );
+    announceTheme();
+  });
+
+  preference.addEventListener('change', (event) => {
+    try {
+      if (localStorage.getItem('theme')) return;
+    } catch {}
+    root.classList.toggle('dark', event.matches);
+    announceTheme();
   });
 </script>
