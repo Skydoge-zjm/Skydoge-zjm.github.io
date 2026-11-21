@@ -1,0 +1,244 @@
+@layer components {
+  .shell,
+  .header-inner {
+    width: min(calc(100% - 2 * var(--gutter)), 70rem);
+    margin-inline: auto;
+  }
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    border-bottom: 1px solid var(--rule);
+    background: var(--paper);
+  }
+  .header-inner {
+    display: flex;
+    align-items: center;
+    min-height: var(--header-height);
+  }
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding-top: 0.15em;
+    font: 520 1.65rem/1 var(--font-display);
+    letter-spacing: -0.04em;
+  }
+  .site-nav {
+    display: flex;
+    align-self: stretch;
+    gap: clamp(1rem, 2.4vw, 2.1rem);
+    margin-left: auto;
+  }
+  .site-nav a {
+    position: relative;
+    display: grid;
+    min-width: 2.25rem;
+    min-height: 44px;
+    place-items: center;
+    color: var(--ink-2);
+    font-size: 0.875rem;
+    white-space: nowrap;
+  }
+  .site-nav a[aria-current] {
+    color: var(--ink);
+    font-weight: 600;
+  }
+  .site-nav a[aria-current]::after {
+    position: absolute;
+    right: 0.22rem;
+    bottom: -1px;
+    left: 0.22rem;
+    height: 2px;
+    background: var(--seal);
+    content: "";
+  }
+  .header-tools {
+    display: flex;
+    align-items: center;
+    gap: 0.05rem;
+    margin-left: clamp(0.8rem, 2.1vw, 2rem);
+  }
+  .header-tools::before {
+    width: 1px;
+    height: 1.15rem;
+    margin-right: 0.65rem;
+    background: var(--rule-strong);
+    content: "";
+  }
+  .icon-btn {
+    display: inline-grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 3px;
+    background: transparent;
+    color: var(--ink-2);
+    cursor: pointer;
+  }
+  .icon-btn svg { width: 1.13rem; height: 1.13rem; }
+  .icon-btn:hover,
+  .icon-btn[aria-current] { background: var(--muted-surface); color: var(--ink); }
+  .site-nav a:hover,
+  .site-footer a:hover { color: var(--seal); }
+
+  .content {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: calc(100svh - var(--header-height));
+  }
+  .page-main {
+    flex: 1 0 auto;
+    width: 100%;
+    max-width: 58rem;
+    margin-inline: auto;
+    padding-block: clamp(2.5rem, 5vw, 4.75rem) clamp(4rem, 8vw, 7rem);
+  }
+  .page-main--wide { max-width: none; }
+  .measure,
+  .page-main > .prose { max-width: var(--measure); }
+  .site-footer {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0 1rem;
+    padding-block: 1rem 1.5rem;
+    border-top: 1px solid var(--rule-strong);
+    font: 400 0.76rem/1.5 var(--font-mono);
+    color: var(--ink-3);
+  }
+  .site-footer nav { display: flex; gap: 1.25rem; }
+  .site-footer a { display: inline-flex; align-items: center; min-height: 44px; }
+
+  .ledger { margin: 0; padding: 0; list-style: none; }
+  .ledger-row {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: clamp(0.7rem, 2vw, 1.7rem);
+    padding-block: 1.5rem 1.6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .ledger-row[hidden] { display: none; }
+  .ledger-copy { min-width: 0; }
+  .ledger-meta,
+  .ledger-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 0.7rem;
+  }
+  .ledger-meta {
+    color: var(--ink-3);
+    font-size: 0.75rem;
+    line-height: 1.5;
+  }
+  .ledger-date,
+  .ledger-duration {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .ledger-meta .category-label {
+    position: relative;
+    z-index: 1;
+    min-height: 24px;
+    font-size: inherit;
+  }
+  .ledger-meta .category-label::before,
+  .ledger-duration::before {
+    width: 2px;
+    height: 2px;
+    margin-right: 0.7rem;
+    border-radius: 50%;
+    background: var(--ink-3);
+    content: "";
+  }
+  .ledger-duration { display: inline-flex; align-items: center; }
+  .ledger-heading { margin: 0.38rem 0 0; text-wrap: balance; }
+  .ledger-title {
+    font-size: clamp(1.15rem, 1rem + 0.55vw, 1.44rem);
+    font-weight: 600;
+    letter-spacing: -0.018em;
+    line-height: 1.48;
+    overflow-wrap: anywhere;
+  }
+  .ledger-heading a::after { position: absolute; inset: 0; content: ""; }
+  .ledger-title:hover,
+  .ledger-heading:focus-within,
+  .search-result-link:hover .ledger-title { color: var(--seal); }
+  .ledger-description {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow: hidden;
+    margin-top: 0.48rem;
+    color: var(--ink-2);
+    font-size: 0.91rem;
+    line-height: 1.8;
+  }
+  .ledger-tags { margin-top: 0.65rem; }
+  .ledger-tags .chip {
+    padding: 0;
+    border: 0;
+    font-size: 0.75rem;
+    color: var(--ink-3);
+  }
+  .ledger-arrow {
+    align-self: center;
+    color: var(--ink-3);
+    font-family: var(--font-mono);
+    line-height: 1;
+  }
+  .ledger-row:focus-within .ledger-arrow,
+  .ledger-row:hover .ledger-arrow { color: var(--seal); }
+  .category-label {
+    display: inline-flex;
+    align-items: center;
+    min-height: 1.75rem;
+    color: var(--seal);
+    font-size: 0.8125rem;
+  }
+  .category-label:hover { text-decoration: underline; text-underline-offset: 0.2em; }
+  .search-result-link { display: block; grid-column: 1 / -1; min-height: 2.75rem; }
+
+  .post-layout { max-width: var(--measure); margin-inline: auto; }
+  .post-column { min-width: 0; }
+  .toc { display: none; }
+  @media (min-width: 64rem) {
+    .post-layout.has-toc {
+      display: grid;
+      grid-template-columns: minmax(0, var(--measure)) minmax(12rem, 15rem);
+      justify-content: center;
+      gap: clamp(2.25rem, 6vw, 5.5rem);
+      max-width: none;
+    }
+    .toc {
+      position: sticky;
+      top: calc(var(--header-height) + 1.75rem);
+      display: block;
+      align-self: start;
+      max-height: calc(100dvh - var(--header-height) - 3rem);
+      padding: 0.3rem 0.5rem 0 0;
+      overflow: auto;
+      scrollbar-width: thin;
+    }
+  }
+  @media (max-width: 35rem) {
+    .site-header { position: static; }
+    .header-inner { display: grid; grid-template-columns: 1fr auto; }
+    .brand, .header-tools { height: 3.5rem; }
+    .header-tools { grid-column: 2; grid-row: 1; }
+    .header-tools::before { display: none; }
+    .site-nav {
+      grid-column: 1 / -1;
+      justify-content: space-between;
+      gap: 0;
+      margin: 0;
+    }
+    .site-nav a { min-width: 3rem; }
+    .ledger-row { padding-block: 1.15rem 1.25rem; }
+  }
+}

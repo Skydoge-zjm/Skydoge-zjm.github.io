@@ -1,5 +1,5 @@
 ---
-import Sidebar from '../components/Sidebar.astro';
+import SiteHeader from '../components/SiteHeader.astro';
 import Footer from '../components/Footer.astro';
 import '../styles/global.css';
 import { SITE } from '../consts';
@@ -14,6 +14,7 @@ interface Props {
   noindex?: boolean;
   /** 是否允许被站内搜索索引（只有文章页需要） */
   searchable?: boolean;
+  wide?: boolean;
   /** 页面结构化数据，如 BlogPosting */
   jsonLd?: Record<string, unknown>;
 }
@@ -24,6 +25,7 @@ const {
   ogType = 'website',
   noindex = false,
   searchable = false,
+  wide = false,
   jsonLd,
 } = Astro.props;
 
@@ -60,7 +62,7 @@ const jsonLdText = jsonLd
     <meta name="twitter:description" content={description} />
     {jsonLdText && <script type="application/ld+json" set:html={jsonLdText}></script>}
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.svg?v=2" type="image/svg+xml" />
     <link
       rel="alternate"
       type="application/rss+xml"
@@ -84,10 +86,10 @@ const jsonLdText = jsonLd
 
   <body>
     <a class="skip-link" href="#main-content">跳至正文</a>
+    <SiteHeader />
     <div class="shell">
-      <Sidebar />
       <div class="content" data-pagefind-ignore={searchable ? undefined : ''}>
-        <main class="page-main" id="main-content" tabindex="-1">
+        <main class:list={['page-main', { 'page-main--wide': wide }]} id="main-content" tabindex="-1">
           <slot />
         </main>
         <Footer />

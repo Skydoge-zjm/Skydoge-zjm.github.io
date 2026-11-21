@@ -2,28 +2,30 @@
 import type { CollectionEntry } from 'astro:content';
 import Tag from './Tag.astro';
 import Category from './Category.astro';
-import { formatDate } from '../lib/utils';
+import { formatDate, readingTime } from '../lib/utils';
 
 interface Props {
   post: CollectionEntry<'blog'>;
   /** 输出分类和年份字段，供文章列表客户端筛选使用 */
   filterable?: boolean;
-  /** 首页首篇文章使用更明确的视觉层级 */
-  featured?: boolean;
   headingLevel?: 'h2' | 'h3';
 }
 
-const { post, filterable = false, featured = false, headingLevel: Heading = 'h2' } = Astro.props;
+const { post, filterable = false, headingLevel: Heading = 'h2' } = Astro.props;
 const tags = post.data.tags.slice(0, 2);
 ---
 
 <li
-  class:list={['ledger-row', { 'ledger-row--featured': featured }]}
+  class="ledger-row"
   data-year={filterable ? String(post.data.pubDate.getFullYear()) : undefined}
   data-category={filterable ? post.data.category : undefined}
 >
   <div class="ledger-copy">
-    {featured && <p class="ledger-eyebrow">最近一篇</p>}
+    <div class="ledger-meta">
+      <time class="ledger-date" datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
+      <Category category={post.data.category} />
+      <span class="ledger-duration">{readingTime(post.body ?? '')} 分钟</span>
+    </div>
     <Heading class="ledger-heading">
       <a href={`/blog/${post.id}/`} class="ledger-title">
         {post.data.title}
@@ -31,15 +33,9 @@ const tags = post.data.tags.slice(0, 2);
       </a>
     </Heading>
     <p class="ledger-description">{post.data.description}</p>
-    <div class="ledger-meta">
-      <time class="ledger-date" datetime={post.data.pubDate.toISOString()}>{formatDate(post.data.pubDate)}</time>
-      <Category category={post.data.category} />
-      {tags.length > 0 && (
-        <span class="ledger-tags">
-          {tags.map((tag) => <Tag tag={tag} />)}
-        </span>
-      )}
-    </div>
+    {filterable && tags.length > 0 && (
+      <div class="ledger-tags">{tags.map((tag) => <Tag tag={tag} />)}</div>
+    )}
   </div>
-  <span class="ledger-arrow" aria-hidden="true">↗</span>
+  <span class="ledger-arrow" aria-hidden="true">→</span>
 </li>

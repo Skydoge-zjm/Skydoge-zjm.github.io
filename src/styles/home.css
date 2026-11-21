@@ -1,0 +1,148 @@
+@layer components {
+  .home-profile {
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    grid-template-areas: "identity drawing" "bio drawing" "links drawing";
+    align-content: center;
+    column-gap: clamp(2rem, 5vw, 5rem);
+    max-width: 54rem;
+    min-height: 13rem;
+    margin-inline: auto;
+  }
+  .profile-identity {
+    grid-area: identity;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .profile-avatar {
+    width: clamp(3.3rem, 5.2vw, 4.5rem);
+    height: auto;
+    border-radius: 50%;
+  }
+  .profile-identity h1 {
+    margin: 0.12em 0 0;
+    font: 500 clamp(2.65rem, 4.2vw, 3.75rem)/1 var(--font-display);
+    letter-spacing: -0.052em;
+  }
+  .profile-bio {
+    grid-area: bio;
+    margin-top: 1.35rem;
+    color: var(--ink-2);
+    font-size: clamp(1rem, 1.35vw, 1.12rem);
+    line-height: 1.85;
+  }
+  .profile-bio span { display: block; }
+  .profile-links {
+    grid-area: links;
+    display: flex;
+    gap: 1.3rem;
+    margin-top: 0.45rem;
+  }
+  .profile-links a,
+  .writing-head a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-height: 44px;
+    color: var(--ink-2);
+    font-size: 0.83rem;
+  }
+  .profile-links span,
+  .writing-head a span { color: var(--seal); font-family: var(--font-mono); }
+  .profile-links a:hover,
+  .writing-head a:hover,
+  .writing-link:hover h3,
+  .writing-link:focus-visible h3 { color: var(--seal); }
+  .profile-drawing {
+    grid-area: drawing;
+    place-self: center end;
+    width: 100%;
+    max-width: 22rem;
+    aspect-ratio: 2 / 1;
+    background-color: var(--ink-2);
+    mask: url('../assets/graphite-study.webp') center / contain no-repeat;
+    pointer-events: none;
+  }
+
+  .home-writing { margin-top: clamp(2.5rem, 5.4vw, 5rem); }
+  .writing-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .writing-head h2 {
+    font: 550 1.5rem/1.4 var(--font-display);
+    letter-spacing: -0.025em;
+  }
+  .writing-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: clamp(2rem, 3.6vw, 3rem) clamp(1.8rem, 3.5vw, 3.25rem);
+    margin: 1.7rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .writing-link { display: block; }
+  .writing-art {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-bottom: 0.8rem;
+  }
+  .dark .writing-art { filter: invert(1) hue-rotate(180deg); }
+  .writing-link h3 {
+    font: 550 clamp(1.04rem, 1.3vw, 1.14rem)/1.55 var(--font-sans);
+    letter-spacing: -0.01em;
+    text-wrap: pretty;
+    overflow-wrap: anywhere;
+  }
+  .writing-link time {
+    display: block;
+    margin-top: 0.4rem;
+    color: var(--ink-3);
+    font: 400 0.76rem/1.6 var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+  .home-writing .empty-note { margin-top: 1.2rem; }
+
+  @media (max-width: 54rem) {
+    .writing-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .home-profile { min-height: auto; column-gap: 1.5rem; }
+  }
+  @media (max-width: 35rem) {
+    .home-profile {
+      grid-template-columns: minmax(0, 1fr) clamp(4.6rem, 25vw, 8rem);
+      grid-template-areas: "identity drawing" "bio bio" "links links";
+      column-gap: 0.5rem;
+    }
+    .profile-identity { gap: 0.7rem; }
+    .profile-avatar { width: 2.9rem; }
+    .profile-identity h1 { font-size: clamp(2.05rem, 8vw, 2.65rem); }
+    .profile-bio { margin-top: 1rem; }
+    .profile-links { margin-top: 0.2rem; }
+    .home-writing { margin-top: 2rem; }
+    .writing-head { padding-bottom: 0.25rem; }
+    .writing-grid { grid-template-columns: minmax(0, 1fr); gap: 0; margin-top: 0; }
+    .writing-grid li + li { border-top: 1px solid var(--rule); }
+    .writing-link {
+      display: grid;
+      grid-template-columns: clamp(4.3rem, 22vw, 6.8rem) minmax(0, 1fr);
+      align-content: center;
+      column-gap: 0.9rem;
+      padding-block: 1.2rem;
+    }
+    .writing-art {
+      grid-row: 1 / 3;
+      align-self: center;
+      height: clamp(3.55rem, 15vw, 5rem);
+      margin: 0;
+      object-fit: cover;
+    }
+    .writing-link h3 { align-self: end; }
+    .writing-link time { margin-top: 0.3rem; }
+  }
+}

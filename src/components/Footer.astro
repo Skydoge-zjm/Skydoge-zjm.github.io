@@ -2,12 +2,11 @@
 import { SITE } from '../consts';
 ---
 
-<footer class="mt-auto border-t border-border pt-6" data-pagefind-ignore>
-  <div
-    class="flex flex-col gap-2 text-xs text-fg-faint sm:flex-row sm:items-center sm:justify-between"
-  >
-    <p>
-      © {new Date().getFullYear()} {SITE.name} · 本站由 Astro 构建，托管于 GitHub Pages
-    </p>
-  </div>
+<footer class="site-footer" data-pagefind-ignore>
+  <p>© {new Date().getFullYear()} {SITE.name}</p>
+  <nav aria-label="订阅与联系">
+    <a href={SITE.social.github} target="_blank" rel="noopener noreferrer">GitHub</a>
+    <a href={`mailto:${SITE.social.email}`}>邮箱</a>
+    <a href={SITE.social.rss}>RSS</a>
+  </nav>
 </footer>

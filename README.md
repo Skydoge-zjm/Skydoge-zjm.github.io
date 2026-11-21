@@ -21,11 +21,11 @@ src/
 ├── consts.ts             # 站点信息、导航、社交链接
 ├── lib/utils.ts          # 文章排序 / 标签统计 / 阅读时长 / 相关文章
 ├── lib/markdown-plugins.mjs # 数学、提示块、图片、表格的静态处理
-├── styles/global.css     # 设计变量（配色、字体、间距）+ 全部自定义样式
+├── styles/               # 配色、文字排版、全站布局与首页样式
 ├── layouts/
 │   ├── BaseLayout.astro  # 全站骨架：head、导航、页脚、主题初始化
 │   └── PostLayout.astro  # 文章页：标题、元信息、目录、系列与相关文章
-├── components/           # Sidebar / Footer / PostCard / Tag / ThemeToggle ...
+├── components/           # SiteHeader / Footer / PostCard / Tag / ThemeToggle ...
 └── pages/                # 路由即文件
     ├── index.astro       # 首页
     ├── blog/             # 文章列表（标签/年份筛选）+ 文章详情

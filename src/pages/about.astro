@@ -1,36 +1,50 @@
 ---
+import { Image } from 'astro:assets';
+import avatar from '../assets/skydoge-avatar.jpg';
+import { PROJECTS } from '../data/projects';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { SITE } from '../consts';
 ---
 
-<BaseLayout title="关于" description="关于 Skydoge 和这个博客">
-  <div class="page-head">
+<BaseLayout title="关于">
+  <header class="page-head author-intro">
     <h1 class="page-title">关于</h1>
-  </div>
+    <p class="author-bio">
+      你好，我是 <strong>{SITE.name}</strong>。{SITE.description}
+    </p>
+    <Image
+      src={avatar}
+      alt={`${SITE.name} 的 GitHub 头像`}
+      width={128}
+      height={128}
+      densities={[1, 2, 3]}
+      loading="eager"
+      class="author-avatar"
+    />
+  </header>
 
   <!-- ↓↓↓ 以下内容按需修改成你自己的介绍 ↓↓↓ -->
   <div class="prose">
-    <p>
-      你好，我是 <strong>{SITE.name}</strong>，一名开发者。
-      这里是我的个人博客，用来放技术笔记、踩坑记录和一些不成熟的想法。
-    </p>
-
     <h2>我在做什么</h2>
     <p>
-      平时主要写代码，偶尔折腾工具和效率流。相信「写下来」是理解一件事最便宜的方式，
+      研究之余，我也写代码、做工具。相信「写下来」是理解一件事最便宜的方式，
       所以有了这个站。
     </p>
 
-    <h2>这个博客</h2>
-    <p>
-      用 <a href="https://astro.build/">Astro</a> 从零手写，
-      部署在 <a href="https://pages.github.com/">GitHub Pages</a>。
-      没有后台、没有数据库、没有追踪脚本——打开就是几 KB 的静态文件。
-    </p>
-    <p>
-      源码在 <a href={SITE.social.github}>GitHub</a>，
-      欢迎顺手点个 Star，也欢迎提 issue 交流。
-    </p>
+    <section aria-labelledby="products">
+      <h2 id="products">我做的产品</h2>
+      <dl class="product-list">
+        {PROJECTS.map((project) => (
+          <div>
+            <dt><a href={project.href}>{project.name}</a></dt>
+            <dd>
+              {project.description}
+              {project.source && <a class="product-source" href={project.source} aria-label={`${project.name} 源码`}>源码</a>}
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </section>
 
     <h2>联系我</h2>
     <ul>
@@ -45,3 +59,46 @@ import { SITE } from '../consts';
   </div>
   <!-- ↑↑↑ 以上内容按需修改成你自己的介绍 ↑↑↑ -->
 </BaseLayout>
+
+<style>
+  .author-intro {
+    display: grid;
+    grid-template-columns: minmax(0, var(--measure)) auto;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem clamp(1.25rem, 4vw, 3rem);
+  }
+  .author-bio {
+    grid-column: 1;
+    color: var(--ink-2);
+    font-size: 1.0625rem;
+    line-height: 1.9;
+  }
+  .author-bio strong { color: var(--ink); }
+  .author-avatar {
+    grid-column: 2;
+    grid-row: 1 / 3;
+    width: clamp(5rem, 11vw, 8rem);
+    height: auto;
+    border-radius: 0.5rem;
+  }
+  .prose > h2:first-child { margin-top: 0; }
+  .product-list { margin-top: 0.65rem; }
+  .product-list > div {
+    display: grid;
+    grid-template-columns: 6.75rem minmax(0, 1fr);
+    align-items: baseline;
+    gap: 0.15rem 1.25rem;
+    padding-block: 0.85rem;
+    border-bottom: 1px solid var(--rule);
+  }
+  .product-list dt { font-weight: 600; }
+  .product-list dd { color: var(--ink-2); font-size: 0.95rem; }
+  .product-source { margin-inline-start: 0.5rem; font-size: 0.82rem; white-space: nowrap; }
+  @media (max-width: 35rem) {
+    .author-intro { row-gap: 1rem; }
+    .author-avatar { grid-row: 1; }
+    .author-bio { grid-column: 1 / -1; }
+    .product-list > div { grid-template-columns: 1fr; }
+  }
+</style>

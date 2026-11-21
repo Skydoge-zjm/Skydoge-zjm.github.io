@@ -1,26 +1,28 @@
 export interface Project {
   name: string;
   description: string;
-  image: string;
-  imageAlt: string;
-  imageWidth: number;
-  imageHeight: number;
   href: string;
   source?: string;
-  tags: string[];
 }
 
-/** 首页展示的真实项目，详情指向站内使用指南。 */
+/** 「关于」页的产品，按展示顺序排列。 */
 export const PROJECTS: Project[] = [
   {
+    name: 'Topolumia',
+    description: '本地优先的科研工作台，让 Agent 跨会话接续研究，由研究者对照文献原文和实验记录确认结论。',
+    href: 'https://skydoge-zjm.github.io/Topolumia/',
+    source: 'https://github.com/Skydoge-zjm/Topolumia',
+  },
+  {
+    name: 'Runicorn',
+    description: '在本机或 GPU 服务器上记录训练过程，对比多次实验的指标曲线。',
+    href: 'https://skydoge-zjm.github.io/Runicorn/',
+    source: 'https://github.com/Skydoge-zjm/Runicorn',
+  },
+  {
     name: 'DailyFlow',
-    description: '一个本地优先的 Windows 日程管理工具。用桌面应用、悬浮窗和便签安排日常，也可以让 AI Agent 通过对话帮你整理任务。',
-    image: '/images/dailyflow/dailyflow-main.png',
-    imageAlt: 'DailyFlow 桌面应用：当天任务、周历、快速添加和桌面便签',
-    imageWidth: 1360,
-    imageHeight: 1000,
+    description: '在 Windows 桌面安排日程，也可以让 Agent 读写同一份本地任务清单。',
     href: '/blog/dailyflow-guide/',
     source: 'https://github.com/Skydoge-zjm/DailyFlow',
-    tags: ['Windows', '本地优先', 'AI Agent'],
   },
 ];

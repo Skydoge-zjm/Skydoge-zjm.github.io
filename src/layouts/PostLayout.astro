@@ -43,7 +43,7 @@ const jsonLd = {
 };
 ---
 
-<BaseLayout title={title} description={description} ogType="article" searchable jsonLd={jsonLd}>
+<BaseLayout title={title} description={description} ogType="article" searchable wide jsonLd={jsonLd}>
   <div class="reading-progress" id="reading-progress" role="progressbar" aria-label="阅读进度" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" data-pagefind-ignore>
     <span></span>
   </div>
@@ -54,27 +54,121 @@ const jsonLd = {
     </svg>
   </button>
 
-  <article class="measure post-article" data-pagefind-body>
-    <header class="post-header">
-      <a class="post-back" href="/blog/" data-pagefind-ignore><span aria-hidden="true">←</span> 全部文章</a>
-      <h1 class="post-title">{title}</h1>
-      <div class="post-meta">
-        <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
-        <span>约 {minutes} 分钟</span>
-        <Category category={category} filterable />
-        {updatedDate && <span>更新于 <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time></span>}
-      </div>
-      {tags.length > 0 && (
-        <div class="post-tags">
-          {tags.map((tag) => <Tag tag={tag} />)}
-        </div>
-      )}
-    </header>
+  <div class:list={['post-layout', { 'has-toc': toc.length >= 3 }]}>
+    <div class="post-column">
+      <article class="measure post-article" data-pagefind-body>
+        <header class="post-header">
+          <a class="post-back" href="/blog/" data-pagefind-ignore><span aria-hidden="true">←</span> 全部文章</a>
+          <h1 class="post-title">{title}</h1>
+          <p class="post-dek">{description}</p>
+          <div class="post-meta">
+            <time datetime={pubDate.toISOString()}>{formatDate(pubDate)}</time>
+            <span>约 {minutes} 分钟</span>
+            <Category category={category} filterable />
+            {updatedDate && <span>更新于 <time datetime={updatedDate.toISOString()}>{formatDate(updatedDate)}</time></span>}
+          </div>
+          {tags.length > 0 && (
+            <div class="post-tags">
+              {tags.map((tag) => <Tag tag={tag} />)}
+            </div>
+          )}
+        </header>
 
+        {
+          toc.length >= 3 && (
+            <details class="toc-mobile" data-pagefind-ignore>
+              <summary>文章目录 <span>{toc.length} 节</span></summary>
+              <ul class="toc-list">
+                {toc.map((h) => (
+                  <li>
+                    <a href={`#${h.slug}`} class="toc-link" data-toc-link data-depth={h.depth}>
+                      {h.text}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </details>
+          )
+        }
+
+        <div class="post-body prose">
+          <slot />
+        </div>
+        <footer class="post-end" data-pagefind-ignore>
+          <span class="post-end-label">分享这篇文章</span>
+          <div class="post-actions">
+            <button type="button" class="text-action" id="share-post">分享 <span aria-hidden="true">↗</span></button>
+            <button type="button" class="text-action" id="copy-post-link">复制链接</button>
+            <span class="copy-status" id="post-action-status" role="status" aria-live="polite"></span>
+          </div>
+        </footer>
+      </article>
+
+      {
+        series && seriesPosts.length > 1 && (
+          <nav class="series-nav measure mt-14" aria-label={`${series}系列文章`} data-pagefind-ignore>
+            <p class="section-label">系列 · {series}</p>
+            <ol class="series-list">
+              {seriesPosts.map((item, index) => (
+                <li>
+                  <span class="series-index">{String(index + 1).padStart(2, '0')}</span>
+                  {item.id === post.id ? (
+                    <span class="series-current" aria-current="page">{item.data.title}</span>
+                  ) : (
+                    <a class="series-link" href={`/blog/${item.id}/`}>{item.data.title}</a>
+                  )}
+                </li>
+              ))}
+            </ol>
+          </nav>
+        )
+      }
+
+      {
+        related.length > 0 && (
+          <section class="related-section measure mt-14" aria-labelledby="related-title" data-pagefind-ignore>
+            <h2 class="section-label" id="related-title">相关文章</h2>
+            <ul class="related-list">
+              {related.map((item) => (
+                <li>
+                  <time datetime={item.data.pubDate.toISOString()}>{formatDate(item.data.pubDate)}</time>
+                  <a href={`/blog/${item.id}/`}>{item.data.title}</a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      {
+        (prev || next) && (
+          <nav class="post-nav measure mt-12" aria-label="上一篇 / 下一篇" data-pagefind-ignore>
+            {prev ? (
+              <a href={`/blog/${prev.id}/`} class="post-nav-item">
+                <p class="post-nav-dir">较早一篇</p>
+                <p class="post-nav-title">{prev.data.title}</p>
+              </a>
+            ) : (
+              <span />
+            )}
+            {next ? (
+              <a href={`/blog/${next.id}/`} class="post-nav-item sm:text-right">
+                <p class="post-nav-dir">较新一篇</p>
+                <p class="post-nav-title">{next.data.title}</p>
+              </a>
+            ) : (
+              <span />
+            )}
+          </nav>
+        )
+      }
+    </div>
+
+    {/* 宽屏正文旁目录 */}
     {
       toc.length >= 3 && (
-        <details class="toc-mobile" data-pagefind-ignore>
-          <summary>文章目录 <span>{toc.length} 节</span></summary>
+        <aside class="toc" aria-label="目录" data-pagefind-ignore>
+          <p class="toc-label">目录</p>
           <ul class="toc-list">
             {toc.map((h) => (
               <li>
@@ -84,99 +178,10 @@ const jsonLd = {
               </li>
             ))}
           </ul>
-        </details>
+        </aside>
       )
     }
-
-    <div class="post-body prose">
-      <slot />
-    </div>
-    <footer class="post-end" data-pagefind-ignore>
-      <span class="post-end-label">分享这篇文章</span>
-      <div class="post-actions">
-        <button type="button" class="text-action" id="share-post">分享 <span aria-hidden="true">↗</span></button>
-        <button type="button" class="text-action" id="copy-post-link">复制链接</button>
-        <span class="copy-status" id="post-action-status" role="status" aria-live="polite"></span>
-      </div>
-    </footer>
-  </article>
-
-  {
-    series && seriesPosts.length > 1 && (
-      <nav class="series-nav measure mt-14" aria-label={`${series}系列文章`} data-pagefind-ignore>
-        <p class="section-label">系列 · {series}</p>
-        <ol class="series-list">
-          {seriesPosts.map((item, index) => (
-            <li>
-              <span class="series-index">{String(index + 1).padStart(2, '0')}</span>
-              {item.id === post.id ? (
-                <span class="series-current" aria-current="page">{item.data.title}</span>
-              ) : (
-                <a class="series-link" href={`/blog/${item.id}/`}>{item.data.title}</a>
-              )}
-            </li>
-          ))}
-        </ol>
-      </nav>
-    )
-  }
-
-  {
-    related.length > 0 && (
-      <section class="related-section measure mt-14" aria-labelledby="related-title" data-pagefind-ignore>
-        <h2 class="section-label" id="related-title">相关文章</h2>
-        <ul class="related-list">
-          {related.map((item) => (
-            <li>
-              <time datetime={item.data.pubDate.toISOString()}>{formatDate(item.data.pubDate)}</time>
-              <a href={`/blog/${item.id}/`}>{item.data.title}</a>
-            </li>
-          ))}
-        </ul>
-      </section>
-    )
-  }
-
-  {
-    (prev || next) && (
-      <nav class="post-nav measure mt-12" aria-label="上一篇 / 下一篇" data-pagefind-ignore>
-        {prev ? (
-          <a href={`/blog/${prev.id}/`} class="post-nav-item">
-            <p class="post-nav-dir">较早一篇</p>
-            <p class="post-nav-title">{prev.data.title}</p>
-          </a>
-        ) : (
-          <span />
-        )}
-        {next ? (
-          <a href={`/blog/${next.id}/`} class="post-nav-item sm:text-right">
-            <p class="post-nav-dir">较新一篇</p>
-            <p class="post-nav-title">{next.data.title}</p>
-          </a>
-        ) : (
-          <span />
-        )}
-      </nav>
-    )
-  }
-
-  {/* 宽屏正文旁目录 */}
-  {
-    toc.length >= 3 && (
-      <aside class="toc" aria-label="目录" data-pagefind-ignore>
-        <p class="toc-label">目录</p>
-        <ul class="toc-list">
-          {toc.map((h) => (
-            <li>
-              <a href={`#${h.slug}`} class="toc-link" data-toc-link data-depth={h.depth}>
-                {h.text}
-              </a>
-            </li>
-          ))}
-        </ul>
-      </aside>
-    )
-  }
+  </div>
 
   <dialog class="image-lightbox" id="image-lightbox" aria-label="图片预览" data-pagefind-ignore>
     <button class="lightbox-close" type="button" aria-label="关闭图片预览" data-lightbox-close>×</button>
